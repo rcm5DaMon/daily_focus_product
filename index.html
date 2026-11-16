@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report Daily Focus Product</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#6b7385; --line:#e3e6ec; --soft:#f1f3f6;
+    --accent:#1f2937; --hi:#fff7e0; --r5:#e8f1ff; --link:#2457c5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;position:sticky;top:0;z-index:5}
+  .stamp{display:flex;gap:22px}
+  .stamp b{display:block;font-size:20px;letter-spacing:.2px}
+  .stamp span{color:var(--muted);font-size:12px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px}
+  .tabs button{border:1px solid #9aa1ad;background:#fff;color:var(--ink);padding:8px 14px;font:600 12px system-ui;cursor:pointer;min-width:78px;border-radius:3px}
+  .tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.3px;flex:1;min-width:240px}
+  .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chip{font-size:11px;color:var(--muted);background:var(--soft);border-radius:20px;padding:3px 10px}
+  .btn{font:600 12px system-ui;border:1px solid var(--line);background:#fff;color:var(--ink);padding:6px 11px;border-radius:6px;text-decoration:none;cursor:pointer}
+  .btn:hover{border-color:#9aa1ad}
+  main{padding:18px 20px 40px;max-width:1500px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:18px}
+  .card h2{margin:0 0 10px;font-size:14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .card h2 small{font-weight:400;color:var(--muted)}
+  .scroll{overflow:auto;max-height:70vh}
+  table{border-collapse:collapse;width:max-content;min-width:100%}
+  th,td{padding:5px 10px;border-bottom:1px solid var(--soft);white-space:nowrap}
+  th{position:sticky;top:0;background:#fff;z-index:2;font-weight:600;text-align:right;border-bottom:2px solid var(--accent);cursor:pointer;user-select:none}
+  th.l,td.l{text-align:left}
+  td{text-align:right;font-variant-numeric:tabular-nums}
+  td.tot,th.tot{border-right:1px solid #9cc0f5;font-weight:700}
+  tr.r5 td{background:var(--r5)}
+  tr.sub td{font-weight:700;background:var(--soft)}
+  tr.lobsub td{font-weight:800;background:#e6e9ef}
+  tr.grand td{font-weight:800;border-top:2px solid var(--accent);background:#fff}
+  td.dim{color:#a0a6b2}
+  .tg{border:0;background:none;cursor:pointer;font:700 12px monospace;color:var(--muted);padding:0 4px 0 0}
+  .filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:12px}
+  .filters label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .filters select,.filters input[type=search]{font:13px system-ui;padding:6px 8px;border:1px solid var(--line);border-radius:5px;min-width:200px;background:#fff}
+  .filters .chk{flex-direction:row;align-items:center;text-transform:none;font-weight:500;font-size:12px;color:var(--ink)}
+  .msg{padding:40px;text-align:center;color:var(--muted)}
+  .note{font-size:11px;color:var(--muted);margin-top:8px}
+  th .arr{font-size:9px;color:var(--muted)}
+  @media (max-width:700px){h1{font-size:16px}.stamp b{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="stamp">
+    <div><b id="lastDate">-</b><span>Last Update</span></div>
+    <div><b id="lastTime">-</b><span>Last Time</span></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <h1 id="title">REPORT DAILY FOCUS PRODUCT</h1>
+  <div class="tools" id="tools"></div>
+</header>
+<main id="main"><div class="msg">Loading…</div></main>
+
+<script src="assets/engine.js"></script>
+<script>
+"use strict";
+let DATA, CONFIG, TAB, VALS, isDraft = false;
+const state = { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1, collapsed: new Set() };
+
+(async function init() {
+  try {
+    const [raw, cfg] = await Promise.all([fetchJSON("data/daily.json"), loadConfig()]);
+    DATA = parseData(raw);
+    const d = new URLSearchParams(location.search).has("draft") ? draftConfig() : null;
+    CONFIG = d || cfg; isDraft = !!d;
+  } catch (e) {
+    document.getElementById("main").innerHTML = `<div class="msg">Could not load data: ${esc(e.message)}<br>Run <b>Refresh data</b> once (GitHub Actions).</div>`;
+    return;
+  }
+  document.getElementById("title").textContent = CONFIG.title || "REPORT DAILY FOCUS PRODUCT";
+  document.getElementById("lastDate").textContent = fmtDate(DATA.raw.data_date);
+  document.getElementById("lastTime").textContent = DATA.raw.last_time || "-";
+  document.getElementById("tools").innerHTML =
+    (isDraft ? `<span class="chip" style="background:#fff3c4;color:#7a5b00">Draft config preview (admin)</span>` : "") +
+    `<span class="chip" title="When BigQuery was last queried">Imported ${esc((DATA.raw.refreshed_at || "").slice(0,16))} WIB</span>
+     <a class="btn" target="_blank" rel="noopener" href="https://github.com/${GITHUB_REPO}/actions/workflows/refresh.yml">Refresh data ↗</a>
+     <a class="btn" href="admin.html">Edit columns</a>`;
+  const tabsEl = document.getElementById("tabs");
+  tabsEl.innerHTML = CONFIG.tabs.map(t => `<button data-id="${esc(t.id)}">${esc(t.name)}</button>`).join("");
+  tabsEl.onclick = e => { const b = e.target.closest("button"); if (b) location.hash = b.dataset.id; };
+  window.addEventListener("hashchange", selectTab);
+  selectTab();
+})();
+
+function selectTab() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  TAB = CONFIG.tabs.find(t => t.id === id) || CONFIG.tabs[0];
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.id === TAB.id));
+  VALS = computeTab(DATA, CONFIG, TAB);
+  state.sortCol = -1; state.collapsed.clear();
+  render();
+}
+
+function sumInto(acc, v) { for (let i = 0; i < acc.length; i++) acc[i] += v[i]; }
+const nonzero = v => v && v.some(x => x);
+
+function render() {
+  const n = TAB.columns.length;
+  // ---------- Region table ----------
+  const byRegion = new Map();
+  for (const [site, v] of VALS) {
+    if (!nonzero(v)) continue;
+    const r = DATA.stores.get(site).region;
+    if (!byRegion.has(r)) byRegion.set(r, new Float64Array(n));
+    sumInto(byRegion.get(r), v);
+  }
+  const regions = [...byRegion.keys()].sort((a, b) => regionRank(a) - regionRank(b) || a.localeCompare(b));
+  const gt = new Float64Array(n); regions.forEach(r => sumInto(gt, byRegion.get(r)));
+  const head = TAB.columns.map((c, i) => `<th class="${c.total ? "tot" : ""}">${esc(c.label)}</th>`).join("");
+  const cells = v => TAB.columns.map((c, i) => `<td class="${c.total ? "tot" : ""}">${fmt(v[i])}</td>`).join("");
+  const regionHTML = `
+    <div class="card"><h2>Sales all region <small>${esc(TAB.name)} · qty sold today</small></h2>
+    <div class="scroll"><table>
+      <thead><tr><th class="l">Region</th>${head}</tr></thead>
+      <tbody>${regions.map(r => `<tr class="${r === "REGION 5" ? "r5" : ""}"><td class="l">${esc(r)}</td>${cells(byRegion.get(r))}</tr>`).join("")
+        || `<tr><td class="l" colspan="${n + 1}">No sales yet today.</td></tr>`}
+        <tr class="grand"><td class="l">Total</td>${cells(gt)}</tr></tbody>
+    </table></div></div>`;
+
+  // ---------- Region 5 table ----------
+  let r5 = [...DATA.stores.values()].filter(s => s.region === "REGION 5");
+  r5 = r5.filter(s => nonzero(VALS.get(s.site)) || (state.zero && s.status === "Active"));
+  const lobs = [...new Set(r5.map(s => s.lob || "(no LOB)"))].sort();
+  if (state.lob && !lobs.includes(state.lob)) state.lob = "";
+  const r5a = r5.filter(s => !state.lob || (s.lob || "(no LOB)") === state.lob);
+  const tshs = [...new Set(r5a.map(s => s.tsh || "(no TSH)"))].sort();
+  if (state.tsh && !tshs.includes(state.tsh)) state.tsh = "";
+  const r5b = r5a.filter(s => !state.tsh || (s.tsh || "(no TSH)") === state.tsh);
+  const sites = [...r5b].sort((a, b) => a.desc.localeCompare(b.desc));
+  if (state.site && !sites.some(s => s.site === state.site)) state.site = "";
+  const q = state.q.trim().toUpperCase();
+  const shown = r5b.filter(s => (!state.site || s.site === state.site) && (!q || s.desc.toUpperCase().includes(q) || s.site.toUpperCase().includes(q)));
+
+  const opt = (vals, cur, all) => `<option value="">${all}</option>` + vals.map(v => `<option${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("");
+  const siteOpt = `<option value="">All</option>` + sites.map(s => `<option value="${esc(s.site)}"${s.site === state.site ? " selected" : ""}>${esc(s.desc)}</option>`).join("");
+
+  // group LOB -> TSH -> sites
+  const zero = new Float64Array(n);
+  const val = s => VALS.get(s.site) || zero;
+  const sc = state.sortCol;
+  const sortSites = arr => arr.sort(sc >= 0 ? (a, b) => val(b)[sc] - val(a)[sc] || a.desc.localeCompare(b.desc) : (a, b) => a.desc.localeCompare(b.desc));
+  const tree = new Map();
+  for (const s of shown) {
+    const L = s.lob || "(no LOB)", T = s.tsh || "(no TSH)";
+    if (!tree.has(L)) tree.set(L, new Map());
+    if (!tree.get(L).has(T)) tree.get(L).set(T, []);
+    tree.get(L).get(T).push(s);
+  }
+  let rows = "", grand = new Float64Array(n);
+  for (const L of [...tree.keys()].sort()) {
+    const lobTot = new Float64Array(n), lk = "L|" + L, lc = state.collapsed.has(lk);
+    let lobRows = "";
+    for (const T of [...tree.get(L).keys()].sort()) {
+      const list = sortSites(tree.get(L).get(T)), tk = "T|" + L + "|" + T, tc = state.collapsed.has(tk);
+      const tTot = new Float64Array(n);
+      list.forEach(s => sumInto(tTot, val(s)));
+      sumInto(lobTot, tTot);
+      if (lc) continue;
+      if (!tc) lobRows += list.map(s => `<tr><td class="l dim">${esc(L)}</td><td class="l dim">${esc(T)}</td><td class="l" title="${esc(s.site)}">${esc(s.desc)}</td>${cells(val(s))}</tr>`).join("");
+      lobRows += `<tr class="sub"><td class="l dim">${esc(L)}</td><td class="l"><button class="tg" data-k="${esc(tk)}">${tc ? "⊞" : "⊟"}</button>${esc(T)}</td><td class="l">Total${tc ? ` <span class="dim">(${list.length} stores)</span>` : ""}</td>${cells(tTot)}</tr>`;
+    }
+    sumInto(grand, lobTot);
+    rows += lobRows + `<tr class="lobsub"><td class="l"><button class="tg" data-k="${esc(lk)}">${lc ? "⊞" : "⊟"}</button>${esc(L)}</td><td class="l">Total</td><td></td>${cells(lobTot)}</tr>`;
+  }
+  const head5 = TAB.columns.map((c, i) => `<th class="${c.total ? "tot" : ""}" data-sort="${i}" title="Sort stores by ${esc(c.label)}">${esc(c.label)} <span class="arr">${sc === i ? "▼" : ""}</span></th>`).join("");
+  const r5HTML = `
+    <div class="card"><h2>Region 5 <small>${esc(TAB.name)} · by LOB, TSH and store · ${shown.length} stores</small></h2>
+      <div class="filters">
+        <label>LOB<select id="fLob">${opt(lobs, state.lob, "All")}</select></label>
+        <label>TSH<select id="fTsh">${opt(tshs, state.tsh, "All")}</select></label>
+        <label>Site desc<select id="fSite">${siteOpt}</select></label>
+        <label>Search store<input type="search" id="fQ" placeholder="name or site code" value="${esc(state.q)}"></label>
+        <label class="chk"><input type="checkbox" id="fZero"${state.zero ? " checked" : ""}>&nbsp;Show active stores with no sales</label>
+        <button class="btn" id="fReset">Reset</button>
+        <button class="btn" id="fCsv">Download CSV</button>
+      </div>
+      <div class="scroll"><table id="t5">
+        <thead><tr><th class="l" data-sort="-1">LOB</th><th class="l" data-sort="-1">TSH</th><th class="l" data-sort="-1">SITE DESC</th>${head5}</tr></thead>
+        <tbody>${rows || `<tr><td class="l" colspan="${n + 3}">No Region 5 sales for this selection.</td></tr>`}
+          <tr class="grand"><td class="l">Total</td><td></td><td></td>${cells(grand)}</tr></tbody>
+      </table></div>
+      <div class="note">Qty = PAID, ${esc(describeDefault())}. Click a column header to sort stores by it, click ⊟ to collapse a LOB or TSH.</div>
+    </div>`;
+
+  document.getElementById("main").innerHTML = regionHTML + r5HTML;
+  const $ = id => document.getElementById(id);
+  $("fLob").onchange = e => { state.lob = e.target.value; state.tsh = ""; state.site = ""; render(); };
+  $("fTsh").onchange = e => { state.tsh = e.target.value; state.site = ""; render(); };
+  $("fSite").onchange = e => { state.site = e.target.value; render(); };
+  $("fQ").oninput = e => { state.q = e.target.value; clearTimeout(window._qt); window._qt = setTimeout(() => { render(); const el = $("fQ"); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }, 250); };
+  $("fZero").onchange = e => { state.zero = e.target.checked; render(); };
+  $("fReset").onclick = () => { Object.assign(state, { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1 }); state.collapsed.clear(); render(); };
+  $("fCsv").onclick = () => downloadCsv(shown, val);
+  $("t5").onclick = e => {
+    const b = e.target.closest(".tg");
+    if (b) { const k = b.dataset.k; state.collapsed.has(k) ? state.collapsed.delete(k) : state.collapsed.add(k); render(); return; }
+    const th = e.target.closest("th[data-sort]");
+    if (th) { const i = +th.dataset.sort; state.sortCol = state.sortCol === i ? -1 : i; render(); }
+  };
+}
+
+function describeDefault() {
+  const d = CONFIG.default_filter || {};
+  return Object.entries(d).map(([k, v]) => `${FIELD_LABELS[k] || k} = ${v.join(" / ")}`).join(", ") || "no default filter";
+}
+
+function downloadCsv(list, val) {
+  const q = s => `"${String(s).replace(/"/g, '""')}"`;
+  const lines = [["LOB", "TSH", "Site Code", "Site Desc", ...TAB.columns.map(c => c.label)].map(q).join(",")];
+  [...list].sort((a, b) => (a.lob + a.tsh + a.desc).localeCompare(b.lob + b.tsh + b.desc))
+    .forEach(s => lines.push([s.lob, s.tsh, s.site, s.desc].map(q).concat([...val(s)].map(x => Math.round(x))).join(",")));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\n")], { type: "text/csv" }));
+  a.download = `focus_${TAB.id}_R5_${(DATA.raw.data_date || "").replace(/\//g, "")}.csv`;
+  a.click();
+}
+</script>
+</body>
+</html>

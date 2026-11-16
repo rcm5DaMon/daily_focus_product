@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Back end - Daily Focus Product columns</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1d2330;--muted:#6b7385;--line:#e3e6ec;--soft:#f1f3f6;--accent:#1f2937;--ok:#1a7f4b;--warn:#a15c00}
+  *{box-sizing:border-box}
+  body{margin:0;font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header h1{font-size:17px;margin:0;flex:1;min-width:260px}
+  header h1 small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+  .btn{font:600 12px system-ui;border:1px solid var(--line);background:#fff;color:var(--ink);padding:6px 11px;border-radius:6px;text-decoration:none;cursor:pointer;white-space:nowrap}
+  .btn:hover{border-color:#9aa1ad}
+  .btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.sm{padding:3px 7px;font-size:11px}
+  .btn.x{color:#b42318}
+  .wrap{display:grid;grid-template-columns:260px minmax(0,1fr) 340px;gap:16px;padding:16px 20px 40px}
+  @media (max-width:1200px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:14px}
+  .card h2{font-size:13px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .tablist button{display:flex;justify-content:space-between;width:100%;text-align:left;border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:6px;margin-bottom:6px;cursor:pointer;font:600 12px system-ui}
+  .tablist button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .tablist small{font-weight:400;opacity:.7}
+  label.f{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:8px}
+  input[type=text],select{font:13px system-ui;padding:5px 7px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink)}
+  .cond{display:grid;grid-template-columns:150px minmax(180px,1fr) auto;gap:6px;margin-bottom:5px;align-items:center}
+  aside .cond{grid-template-columns:105px minmax(0,1fr) auto}
+  td.rules{min-width:420px}
+  .cond.ex select{border-color:#f0b4ae}
+  table{border-collapse:collapse;width:100%}
+  th,td{padding:7px 6px;border-bottom:1px solid var(--soft);vertical-align:top;text-align:left}
+  th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+  tr.sel{background:#fffbea}
+  .muted{color:var(--muted);font-size:11px}
+  .vals{max-height:62vh;overflow:auto}
+  .vals table td{padding:4px 6px}
+  .vals tr:hover{background:var(--soft)}
+  .pill{display:inline-block;background:var(--soft);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;color:var(--muted)}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 14px;border-radius:6px;opacity:0;transition:.2s;pointer-events:none}
+  .toast.on{opacity:1}
+  .howto{font-size:12px;color:var(--ink)}
+  .howto ol{padding-left:18px;margin:6px 0}
+  .warn{color:var(--warn);font-weight:600}
+  textarea{width:100%;height:160px;font:12px ui-monospace,Consolas,monospace;border:1px solid var(--line);border-radius:6px;padding:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Back end · tabs &amp; columns
+    <small>Change which model type / model type detail each column counts. Numbers on the right are today's qty, so you can check a rule before publishing.</small></h1>
+  <span id="status" class="muted"></span>
+  <a class="btn" href="index.html">← Dashboard</a>
+  <button class="btn" id="bPreview">Preview dashboard</button>
+  <button class="btn" id="bReset">Discard changes</button>
+  <button class="btn" id="bDownload">Download JSON</button>
+  <button class="btn pri" id="bPublish">Publish…</button>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="card"><h2>Tabs</h2><div class="tablist" id="tabList"></div>
+      <button class="btn sm" id="bAddTab">+ Add tab</button></div>
+    <div class="card"><h2>Applies to every column</h2>
+      <label class="f">Dashboard title<input type="text" id="gTitle"></label>
+      <div class="muted" style="margin-bottom:6px">Default filter (a column can override a key, e.g. Ket PO = PO for a pre-order column)</div>
+      <div id="gFilter"></div>
+    </div>
+  </aside>
+
+  <section>
+    <div class="card" id="tabCard"></div>
+    <div class="card" id="pubCard" hidden>
+      <h2>Publish</h2>
+      <div class="howto">
+        <ol>
+          <li>Click <b>Copy JSON</b> below.</li>
+          <li>Open <a id="ghEdit" target="_blank" rel="noopener">config/focus_products.json on GitHub ↗</a>, select all the text, paste, and click <b>Commit changes</b>.</li>
+          <li>The site redeploys by itself in about a minute (no BigQuery query is needed). Reload the dashboard with Ctrl+F5.</li>
+        </ol>
+      </div>
+      <button class="btn pri" id="bCopy">Copy JSON</button>
+      <textarea id="jsonOut" readonly></textarea>
+    </div>
+  </section>
+
+  <aside>
+    <div class="card"><h2>Values sold today <span class="muted" id="valScope"></span></h2>
+      <label class="f">Show
+        <select id="vField">
+          <option value="model_type">Model type</option>
+          <option value="model_type_detail" selected>Model type detail</option>
+          <option value="detail_cat">Detail category</option>
+          <option value="rofo_category">ROFO category</option>
+          <option value="product_category">Product category</option>
+          <option value="brand">Brand</option>
+          <option value="item">Item description</option>
+        </select></label>
+      <label class="f">Search<input type="text" id="vQ" placeholder="type to filter"></label>
+      <div class="muted" style="margin-bottom:6px">Within this tab's filter + default filter. <b>+ col</b> adds a new column, <b>+ sel</b> adds the value to the selected column.</div>
+      <div class="vals" id="vals"></div>
+    </div>
+  </aside>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="assets/engine.js"></script>
+<script>
+"use strict";
+let DATA, PUBLISHED, CFG, cur = 0, selCol = -1;
+const $ = id => document.getElementById(id);
+const clone = o => JSON.parse(JSON.stringify(o));
+const toast = m => { const t = $("toast"); t.textContent = m; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 1600); };
+
+(async function () {
+  const [raw, cfg] = await Promise.all([fetchJSON("data/daily.json"), loadConfig()]);
+  DATA = parseData(raw);
+  PUBLISHED = cfg;
+  const d = draftConfig();
+  CFG = d ? d : clone(cfg);
+  $("ghEdit").href = `https://github.com/${GITHUB_REPO}/edit/main/config/focus_products.json`;
+  wire(); renderAll();
+})().catch(e => { document.body.innerHTML = `<p style="padding:30px">Could not load: ${esc(e.message)}</p>`; });
+
+function save() {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(CFG)); } catch (e) {}
+  const changed = JSON.stringify(CFG) !== JSON.stringify(PUBLISHED);
+  $("status").innerHTML = changed ? `<span class="warn">Unpublished changes</span>` : "Same as published";
+  $("jsonOut").value = JSON.stringify(CFG, null, 2);
+}
+
+// ---------- condition editor (rule object <-> rows) ----------
+function condEditor(rule, onChange, opts = {}) {
+  const box = document.createElement("div");
+  const entries = Object.entries(rule || {});
+  const draw = () => {
+    box.innerHTML = "";
+    entries.forEach(([k, vals], i) => {
+      const row = document.createElement("div");
+      row.className = "cond" + (opts.exclude ? " ex" : "");
+      const sel = document.createElement("select");
+      sel.innerHTML = RULE_KEYS.map(x => `<option value="${x}"${x === k ? " selected" : ""}>${FIELD_LABELS[x]}</option>`).join("");
+      const inp = document.createElement("input");
+      inp.type = "text"; inp.value = (vals || []).join(", "); inp.placeholder = "values, comma separated";
+      inp.setAttribute("list", "dl_" + k);
+      const del = document.createElement("button"); del.className = "btn sm x"; del.textContent = "✕";
+      sel.onchange = () => { entries[i][0] = sel.value; inp.setAttribute("list", "dl_" + sel.value); commit(); };
+      inp.onchange = () => { entries[i][1] = inp.value.split(",").map(s => s.trim()).filter(Boolean); commit(); };
+      del.onclick = () => { entries.splice(i, 1); commit(); draw(); };
+      row.append(sel, inp, del); box.append(row);
+    });
+    const add = document.createElement("button");
+    add.className = "btn sm"; add.textContent = opts.exclude ? "+ exclude rule" : "+ condition";
+    add.onclick = () => { entries.push([opts.defaultKey || "model_type", []]); draw(); };
+    box.append(add);
+  };
+  const commit = () => {
+    const o = {};
+    for (const [k, v] of entries) if (v && v.length) o[k] = (o[k] || []).concat(v);
+    onChange(o);
+  };
+  draw();
+  return box;
+}
+
+// datalists of known values, so typing a value autocompletes
+function buildDatalists() {
+  const sets = {}; for (const k of RULE_KEYS) sets[k] = new Set();
+  for (const it of DATA.items.values()) {
+    sets.brand.add(it[1]); sets.product_category.add(it[9]); sets.detail_cat.add(it[3]);
+    sets.model_type.add(it[10]); sets.model_type_detail.add(it[11]); sets.rofo_category.add(it[6]);
+  }
+  for (const f of DATA.facts) { sets.ket_po.add(f.po === "PO" ? "PO" : f.po === "NON PO" ? "Non PO" : f.po); sets.line.add(f.line === "INCLUDE" ? "Include" : f.line === "TAKE OUT" ? "Take Out" : f.line); }
+  document.body.insertAdjacentHTML("beforeend", RULE_KEYS.map(k =>
+    `<datalist id="dl_${k}">${[...sets[k]].filter(Boolean).sort().map(v => `<option value="${esc(v)}">`).join("")}</datalist>`).join(""));
+}
+
+function renderAll() { renderTabs(); renderGlobal(); renderTab(); renderVals(); save(); }
+
+function renderTabs() {
+  $("tabList").innerHTML = CFG.tabs.map((t, i) => `<button data-i="${i}" class="${i === cur ? "on" : ""}">${esc(t.name)}<small>${t.columns.length} cols</small></button>`).join("");
+}
+function renderGlobal() {
+  $("gTitle").value = CFG.title || "";
+  const g = $("gFilter"); g.innerHTML = "";
+  g.append(condEditor(CFG.default_filter, o => { CFG.default_filter = o; renderTab(); renderVals(); save(); }, { defaultKey: "ket_po" }));
+}
+
+function totals(tab) {
+  const v = computeTab(DATA, CFG, tab), n = tab.columns.length, all = new Float64Array(n), r5 = new Float64Array(n);
+  for (const [site, row] of v) {
+    const isR5 = DATA.stores.get(site).region === "REGION 5";
+    for (let i = 0; i < n; i++) { all[i] += row[i]; if (isR5) r5[i] += row[i]; }
+  }
+  return { all, r5 };
+}
+
+function renderTab() {
+  const t = CFG.tabs[cur], card = $("tabCard");
+  if (!t) { card.innerHTML = "<p>No tabs. Add one.</p>"; return; }
+  const tot = totals(t);
+  card.innerHTML = `
+    <h2>Tab settings</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <label class="f" style="flex:1;min-width:160px">Tab name (button text)<input type="text" id="tName" value="${esc(t.name)}"></label>
+      <label class="f" style="width:140px">Link id (#…)<input type="text" id="tId" value="${esc(t.id)}"></label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn sm" id="tUp">↑</button><button class="btn sm" id="tDown">↓</button>
+        <button class="btn sm x" id="tDel">Delete tab</button></div>
+    </div>
+    <div class="muted" style="margin:4px 0 6px">Tab filter: every column in this tab only counts items that match this (e.g. Brand = OPPO)</div>
+    <div id="tFilter"></div>
+    <h2 style="margin-top:16px">Columns <span class="muted" style="text-transform:none">· left to right · the column ticked "All" gets the bold divider</span></h2>
+    <table><thead><tr><th style="width:56px"></th><th style="width:150px">Label</th><th>Counts items where…</th><th style="width:40px">All</th><th class="num" style="width:70px">All regions</th><th class="num" style="width:60px">R5</th><th style="width:30px"></th></tr></thead>
+    <tbody id="cols"></tbody></table>
+    <button class="btn sm" id="cAdd" style="margin-top:8px">+ Add column</button>`;
+  $("tFilter").append(condEditor(t.filter, o => { t.filter = o; renderTab(); renderVals(); save(); }, { defaultKey: "brand" }));
+  $("tName").onchange = e => { t.name = e.target.value.trim() || t.name; renderTabs(); save(); };
+  $("tId").onchange = e => { t.id = e.target.value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-") || t.id; save(); };
+  $("tUp").onclick = () => moveTab(-1); $("tDown").onclick = () => moveTab(1);
+  $("tDel").onclick = () => { if (confirm(`Delete tab "${t.name}"?`)) { CFG.tabs.splice(cur, 1); cur = Math.max(0, cur - 1); selCol = -1; renderAll(); } };
+  $("cAdd").onclick = () => { t.columns.push({ label: "New column", match: { model_type: [] } }); selCol = t.columns.length - 1; renderTab(); save(); };
+
+  const body = $("cols");
+  t.columns.forEach((c, i) => {
+    const tr = document.createElement("tr"); if (i === selCol) tr.className = "sel";
+    tr.innerHTML = `<td><button class="btn sm" data-a="up">↑</button><button class="btn sm" data-a="down">↓</button></td>
+      <td><input type="text" value="${esc(c.label)}" style="width:100%"></td><td class="rules"></td>
+      <td><input type="checkbox"${c.total ? " checked" : ""}></td>
+      <td class="num">${fmt(tot.all[i]) || "0"}</td><td class="num">${fmt(tot.r5[i]) || "0"}</td>
+      <td><button class="btn sm x" data-a="del">✕</button></td>`;
+    const rules = tr.querySelector(".rules");
+    rules.append(condEditor(c.match, o => { c.match = o; refreshNums(); save(); }));
+    const exWrap = document.createElement("div"); exWrap.style.marginTop = "4px";
+    exWrap.append(condEditor(c.exclude, o => { if (Object.keys(o).length) c.exclude = o; else delete c.exclude; refreshNums(); save(); }, { exclude: true, defaultKey: "item_contains" }));
+    rules.append(exWrap);
+    tr.querySelector("input[type=text]").onchange = e => { c.label = e.target.value; save(); };
+    tr.querySelector("input[type=checkbox]").onchange = e => { if (e.target.checked) c.total = true; else delete c.total; save(); };
+    tr.onclick = e => {
+      const a = e.target.closest("button[data-a]")?.dataset.a;
+      if (a === "up" && i > 0) { [t.columns[i - 1], t.columns[i]] = [t.columns[i], t.columns[i - 1]]; selCol = i - 1; renderTab(); save(); return; }
+      if (a === "down" && i < t.columns.length - 1) { [t.columns[i + 1], t.columns[i]] = [t.columns[i], t.columns[i + 1]]; selCol = i + 1; renderTab(); save(); return; }
+      if (a === "del") { t.columns.splice(i, 1); selCol = -1; renderTab(); save(); return; }
+      if (selCol !== i) { selCol = i; body.querySelectorAll("tr").forEach((r, j) => r.classList.toggle("sel", j === i)); }
+    };
+    body.append(tr);
+  });
+}
+function refreshNums() {
+  const t = CFG.tabs[cur], tot = totals(t);
+  $("cols").querySelectorAll("tr").forEach((tr, i) => {
+    const td = tr.querySelectorAll("td.num"); td[0].textContent = fmt(tot.all[i]) || "0"; td[1].textContent = fmt(tot.r5[i]) || "0";
+  });
+}
+function moveTab(d) {
+  const j = cur + d; if (j < 0 || j >= CFG.tabs.length) return;
+  [CFG.tabs[cur], CFG.tabs[j]] = [CFG.tabs[j], CFG.tabs[cur]]; cur = j; renderAll();
+}
+
+// ---------- value explorer ----------
+function renderVals() {
+  const t = CFG.tabs[cur]; if (!t) { $("vals").innerHTML = ""; return; }
+  const field = $("vField").value, q = $("vQ").value.trim().toUpperCase();
+  const base = compileRule(Object.assign({}, CFG.default_filter || {}, t.filter || {}));
+  const idx = { brand: 1, product_category: 9, detail_cat: 3, model_type: 10, model_type_detail: 11, rofo_category: 6, item: 8 }[field];
+  const m = new Map();
+  for (const f of DATA.facts) {
+    if (!passAll(base, f)) continue;
+    const v = f.it[idx] || "(blank)";
+    if (q && !U(v).includes(q)) continue;
+    const r = m.get(v) || [0, 0]; r[0] += f.q; if (DATA.stores.get(f.site).region === "REGION 5") r[1] += f.q; m.set(v, r);
+  }
+  $("valScope").textContent = "· " + t.name;
+  const rows = [...m.entries()].sort((a, b) => b[1][0] - a[1][0]).slice(0, 400);
+  const key = field === "item" ? "item_contains" : field;
+  $("vals").innerHTML = `<table><thead><tr><th>${esc(field === "item" ? "Item" : FIELD_LABELS[field])}</th><th class="num">All</th><th class="num">R5</th><th></th></tr></thead><tbody>` +
+    rows.map(([v, r]) => `<tr><td>${esc(v)}</td><td class="num">${fmt(r[0])}</td><td class="num">${fmt(r[1])}</td>
+      <td style="white-space:nowrap"><button class="btn sm" data-v="${esc(v)}" data-k="${key}" data-a="new">+ col</button><button class="btn sm" data-v="${esc(v)}" data-k="${key}" data-a="add">+ sel</button></td></tr>`).join("") +
+    `</tbody></table>` + (rows.length ? "" : `<p class="muted">Nothing sold today for this tab filter.</p>`);
+}
+
+function wire() {
+  buildDatalists();
+  $("tabList").onclick = e => { const b = e.target.closest("button"); if (!b) return; cur = +b.dataset.i; selCol = -1; renderTabs(); renderTab(); renderVals(); };
+  $("bAddTab").onclick = () => { CFG.tabs.push({ id: "new" + CFG.tabs.length, name: "NEW TAB", filter: { brand: [] }, columns: [{ label: "All Device", total: true, match: { product_category: ["Device"] } }] }); cur = CFG.tabs.length - 1; selCol = -1; renderAll(); };
+  $("gTitle").onchange = e => { CFG.title = e.target.value; save(); };
+  $("vField").onchange = renderVals; $("vQ").oninput = renderVals;
+  $("vals").onclick = e => {
+    const b = e.target.closest("button[data-a]"); if (!b) return;
+    const t = CFG.tabs[cur], v = b.dataset.v, k = b.dataset.k;
+    const val = k === "item_contains" ? v : v;
+    if (b.dataset.a === "new") {
+      t.columns.push({ label: v.length > 18 ? v.slice(0, 18) : v, match: { [k]: [val] } });
+      selCol = t.columns.length - 1; toast(`Added column "${v}"`);
+    } else {
+      if (selCol < 0) { toast("Click a column row first"); return; }
+      const c = t.columns[selCol]; c.match = c.match || {}; c.match[k] = [...new Set([...(c.match[k] || []), val])];
+      toast(`Added to "${c.label}"`);
+    }
+    renderTab(); renderTabs(); save();
+  };
+  $("bPreview").onclick = () => { save(); window.open("index.html?draft=1#" + encodeURIComponent((CFG.tabs[cur] || {}).id || ""), "_blank"); };
+  $("bReset").onclick = () => { if (confirm("Discard all unpublished changes?")) { CFG = clone(PUBLISHED); localStorage.removeItem(DRAFT_KEY); cur = 0; selCol = -1; renderAll(); } };
+  $("bDownload").onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(CFG, null, 2) + "\n"], { type: "application/json" }));
+    a.download = "focus_products.json"; a.click();
+  };
+  $("bPublish").onclick = () => { save(); $("pubCard").hidden = false; $("pubCard").scrollIntoView({ behavior: "smooth" }); };
+  $("bCopy").onclick = async () => {
+    const txt = JSON.stringify(CFG, null, 2) + "\n";
+    try { await navigator.clipboard.writeText(txt); } catch (e) { $("jsonOut").select(); document.execCommand("copy"); }
+    toast("Copied - now paste it on GitHub");
+  };
+}
+</script>
+</body>
+</html>
