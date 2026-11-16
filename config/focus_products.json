@@ -73,6 +73,7 @@
       "columns": [
         { "label": "All Device", "total": true, "match": { "product_category": ["Device"] } },
         { "label": "PO V80", "match": { "model_type": ["V80"], "ket_po": ["PO"] } },
+        { "label": "V80 Lite", "match": { "model_type_detail": ["V80 LITE"] } },        
         { "label": "V70", "match": { "model_type": ["V70"] } },
         { "label": "Y05", "match": { "model_type_detail": ["Y05"] } },
         { "label": "Y05E", "match": { "model_type_detail": ["Y05E"] } },
