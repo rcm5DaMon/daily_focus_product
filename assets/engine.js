@@ -42,8 +42,8 @@ function parseData(raw) {
   raw.items = (raw.items || []).filter(Boolean);
   raw.sales = (raw.sales || []).filter(Boolean);
   for (const s of raw.stores) {
-    const [site, region, desc, lob, tsh, status] = s.split("|");
-    stores.set(site, { site, region: region || "Unmapped", desc: desc || site, lob: lob || "", tsh: tsh || "", status: status || "" });
+    const [site, region, desc, lob, tsh, status, bu] = s.split("|");
+    stores.set(site, { site, region: region || "Unmapped", desc: desc || site, lob: lob || "", tsh: tsh || "", status: status || "", bu: bu || "" });
   }
   const items = new Map();            // item -> [item, brand, pc, dc, mt, mtd, rofo, DESC_UPPER, desc]
   for (const s of raw.items) {
@@ -56,7 +56,7 @@ function parseData(raw) {
     const [site, item, po, line, q] = s.split("|");
     const rec = items.get(item);
     if (!rec) continue;
-    if (!stores.has(site)) stores.set(site, { site, region: "Unmapped", desc: site, lob: "", tsh: "", status: "" });
+    if (!stores.has(site)) stores.set(site, { site, region: "Unmapped", desc: site, lob: "", tsh: "", status: "", bu: "" });
     facts.push({ site, it: rec, po: U(po), line: U(line), q: +q });
   }
   return { raw, stores, items, facts };
@@ -85,20 +85,54 @@ function compileColumn(config, tab, col) {
   return f => passAll(inc, f) && !(exc && exc.length && passAll(exc, f));
 }
 
-// -> Map(site -> Float64Array(ncols))
-function computeTab(data, config, tab) {
+// Drill-down fields: what a column breaks into when expanded (tab.drill). Index into an item record.
+const DRILL_FIELDS = {
+  model_type_detail: 11, model_type: 10, brand: 1, detail_cat: 3, rofo_category: 6, item: 8
+};
+const DRILL_LABELS = {
+  model_type_detail: "Model type detail", model_type: "Model type", brand: "Brand",
+  detail_cat: "Detail category", rofo_category: "ROFO category", item: "Item description"
+};
+
+// Brands sold in a tab (inside default filter + tab filter), qty desc. Used by the Brand filter.
+function tabBrands(data, config, tab) {
+  const base = compileRule(Object.assign({}, config.default_filter || {}, tab.filter || {}));
+  const m = new Map();
+  for (const f of data.facts) if (passAll(base, f)) m.set(f.it[1], (m.get(f.it[1]) || 0) + f.q);
+  return [...m.entries()].filter(e => e[1]).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+}
+
+// computeTab(data, config, tab)                        -> Map(site -> Float64Array(ncols))
+// computeTab(data, config, tab, {sub: true, brand})    -> {vals, sub}; sub = Map(site -> [Map(drillValue -> qty) per column])
+function computeTab(data, config, tab, opts) {
+  opts = opts || {};
   const tests = tab.columns.map(c => compileColumn(config, tab, c));
-  const n = tests.length, out = new Map();
+  const n = tests.length, out = new Map(), sub = opts.sub ? new Map() : null;
+  const di = DRILL_FIELDS[tab.drill || "model_type_detail"] ?? 11;
+  const brand = opts.brand ? U(opts.brand) : "";
   for (const f of data.facts) {
-    let row = null;
+    if (brand && f.it[1] !== brand) continue;
+    let row = null, srow = null;
     for (let i = 0; i < n; i++) {
       if (tests[i](f)) {
         if (!row) { row = out.get(f.site); if (!row) { row = new Float64Array(n); out.set(f.site, row); } }
         row[i] += f.q;
+        if (sub) {
+          if (!srow) { srow = sub.get(f.site); if (!srow) { srow = Array.from({ length: n }, () => new Map()); sub.set(f.site, srow); } }
+          const k = f.it[di] || "(blank)";
+          srow[i].set(k, (srow[i].get(k) || 0) + f.q);
+        }
       }
     }
   }
-  return out;
+  return sub ? { vals: out, sub } : out;
+}
+
+// Does a store pass config.zero_sales_store_filter (used for "show stores with no sales")?
+function zeroSalesStore(config, s) {
+  const r = config.zero_sales_store_filter || { status: ["Active"] };
+  const has = (k, v) => !r[k] || !r[k].length || r[k].map(U).includes(U(v));
+  return has("status", s.status) && has("bu_category", s.bu) && has("lob", s.lob) && has("tsh", s.tsh);
 }
 
 function regionRank(r) {
