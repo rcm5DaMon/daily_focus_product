@@ -1,110 +1,567 @@
 {
   "title": "REPORT DAILY FOCUS PRODUCT",
-  "default_filter": { "ket_po": ["Non PO"], "line": ["Include"] },
+  "default_filter": {
+    "ket_po": [
+      "Non PO"
+    ],
+    "line": [
+      "Include"
+    ]
+  },
+  "zero_sales_store_filter": {
+    "status": [
+      "Active"
+    ],
+    "bu_category": [
+      "1MULTIBRAND"
+    ]
+  },
   "tabs": [
     {
       "id": "apple",
       "name": "APPLE",
-      "filter": { "brand": ["APPLE"] },
+      "filter": {
+        "brand": [
+          "APPLE"
+        ]
+      },
+      "drill": "model_type_detail",
       "columns": [
-        { "label": "All Device", "total": true, "match": { "product_category": ["Device"] } },
-        { "label": "iPhone DUO", "match": { "model_type": ["IPHONE DUO"] } },
-        { "label": "iPhone 18", "match": { "model_type": ["IPHONE 18"] } },
-        { "label": "iPhone 17", "match": { "model_type": ["IPHONE 17"] } },
-        { "label": "iPhone 16", "match": { "model_type": ["IPHONE 16"] } },
-        { "label": "iPhone 15", "match": { "model_type": ["IPHONE 15"] } },
-        { "label": "iPad", "match": { "detail_cat": ["IPAD"] } },
-        { "label": "Macbook", "match": { "detail_cat": ["MACBOOK"] } },
-        { "label": "Airpods", "match": { "model_type_detail": ["AIRPODS"] } },
-        { "label": "Watch", "match": { "model_type": ["WATCH"] } }
+        {
+          "label": "All Device",
+          "total": true,
+          "match": {
+            "product_category": [
+              "Device"
+            ]
+          }
+        },
+        {
+          "label": "iPhone DUO",
+          "match": {
+            "model_type": [
+              "IPHONE DUO"
+            ]
+          }
+        },
+        {
+          "label": "iPhone 18",
+          "match": {
+            "model_type": [
+              "IPHONE 18"
+            ]
+          }
+        },
+        {
+          "label": "iPhone 17",
+          "match": {
+            "model_type": [
+              "IPHONE 17"
+            ]
+          }
+        },
+        {
+          "label": "iPhone 16",
+          "match": {
+            "model_type": [
+              "IPHONE 16"
+            ]
+          }
+        },
+        {
+          "label": "iPhone 15",
+          "match": {
+            "model_type": [
+              "IPHONE 15"
+            ]
+          }
+        },
+        {
+          "label": "iPad",
+          "match": {
+            "detail_cat": [
+              "IPAD"
+            ]
+          }
+        },
+        {
+          "label": "Macbook",
+          "match": {
+            "detail_cat": [
+              "MACBOOK"
+            ]
+          }
+        },
+        {
+          "label": "Airpods",
+          "match": {
+            "model_type_detail": [
+              "AIRPODS"
+            ]
+          }
+        },
+        {
+          "label": "Watch",
+          "match": {
+            "model_type": [
+              "WATCH"
+            ]
+          }
+        }
       ]
     },
     {
       "id": "samsung",
       "name": "SAMSUNG",
-      "filter": { "brand": ["SAMSUNG"] },
+      "filter": {
+        "brand": [
+          "SAMSUNG"
+        ]
+      },
+      "drill": "model_type_detail",
       "columns": [
-        { "label": "All Device", "total": true, "match": { "product_category": ["Device"] } },
-        { "label": "FLIP 8", "match": { "model_type": ["FLIP8"] } },
-        { "label": "FOLD 8", "match": { "model_type": ["FOLD8"] } },
-        { "label": "S26", "match": { "model_type": ["S26"] } },
-        { "label": "S26FE", "match": { "model_type_detail": ["S26 FE"] } },
-        { "label": "A07", "match": { "model_type": ["A07"] } },
-        { "label": "A17", "match": { "model_type": ["A17"] } },
-        { "label": "A27", "match": { "model_type": ["A27"] } },
-        { "label": "A37", "match": { "model_type": ["A37"] } },
-        { "label": "A57", "match": { "model_type": ["A57"] } }
+        {
+          "label": "All Device",
+          "total": true,
+          "match": {
+            "product_category": [
+              "Device"
+            ]
+          }
+        },
+        {
+          "label": "FLIP 8",
+          "match": {
+            "model_type": [
+              "FLIP8"
+            ]
+          }
+        },
+        {
+          "label": "FOLD 8",
+          "match": {
+            "model_type": [
+              "FOLD8"
+            ]
+          }
+        },
+        {
+          "label": "S26",
+          "match": {
+            "model_type": [
+              "S26"
+            ]
+          }
+        },
+        {
+          "label": "S26FE",
+          "match": {
+            "model_type_detail": [
+              "S26 FE"
+            ]
+          }
+        },
+        {
+          "label": "A07",
+          "match": {
+            "model_type": [
+              "A07"
+            ]
+          }
+        },
+        {
+          "label": "A17",
+          "match": {
+            "model_type": [
+              "A17"
+            ]
+          }
+        },
+        {
+          "label": "A27",
+          "match": {
+            "model_type": [
+              "A27"
+            ]
+          }
+        },
+        {
+          "label": "A37",
+          "match": {
+            "model_type": [
+              "A37"
+            ]
+          }
+        },
+        {
+          "label": "A57",
+          "match": {
+            "model_type": [
+              "A57"
+            ]
+          }
+        }
       ]
     },
     {
       "id": "xiaomi",
       "name": "XIAOMI",
-      "filter": { "brand": ["XIAOMI"] },
+      "filter": {
+        "brand": [
+          "XIAOMI"
+        ]
+      },
+      "drill": "model_type_detail",
       "columns": [
-        { "label": "All Device", "total": true, "match": { "product_category": ["Device"] } },
-        { "label": "Xiaomi 17", "match": { "model_type_detail": ["XIAOMI 17"] } },
-        { "label": "Xiaomi 17T", "match": { "model_type_detail": ["XIAOMI 17T", "XIAOMI 17T PRO"] } },
-        { "label": "Redmi 17", "match": { "model_type": ["REDMI 17"] } },
-        { "label": "Redmi Note 17", "match": { "model_type": ["NOTE 17"] } },
-        { "label": "Redmi A7", "match": { "model_type": ["REDMI A7"] } },
-        { "label": "Redmi Pad 2", "match": { "model_type": ["MI PAD"] } },
-        { "label": "Xiaomi Pad 8", "match": { "model_type": ["MI PAD 8"] } }
+        {
+          "label": "All Device",
+          "total": true,
+          "match": {
+            "product_category": [
+              "Device"
+            ]
+          }
+        },
+        {
+          "label": "Xiaomi 17",
+          "match": {
+            "model_type_detail": [
+              "XIAOMI 17"
+            ]
+          }
+        },
+        {
+          "label": "Xiaomi 17T",
+          "match": {
+            "model_type_detail": [
+              "XIAOMI 17T",
+              "XIAOMI 17T PRO"
+            ]
+          }
+        },
+        {
+          "label": "Redmi 17",
+          "match": {
+            "model_type": [
+              "REDMI 17"
+            ]
+          }
+        },
+        {
+          "label": "Redmi Note 17",
+          "match": {
+            "model_type": [
+              "NOTE 17"
+            ]
+          }
+        },
+        {
+          "label": "Redmi A7",
+          "match": {
+            "model_type": [
+              "REDMI A7"
+            ]
+          }
+        },
+        {
+          "label": "Redmi Pad 2",
+          "match": {
+            "model_type": [
+              "MI PAD"
+            ]
+          }
+        },
+        {
+          "label": "Xiaomi Pad 8",
+          "match": {
+            "model_type": [
+              "MI PAD 8"
+            ]
+          }
+        }
       ]
     },
     {
       "id": "oppo",
       "name": "OPPO",
-      "filter": { "brand": ["OPPO"] },
+      "filter": {
+        "brand": [
+          "OPPO"
+        ]
+      },
+      "drill": "model_type_detail",
       "columns": [
-        { "label": "All Device", "total": true, "match": { "product_category": ["Device"] } },
-        { "label": "Reno 15", "match": { "model_type": ["RENO 15"] } },
-        { "label": "Reno 16", "match": { "model_type": ["RENO 16"] } },
-        { "label": "A7 PRO", "match": { "model_type": ["A7 PRO"] } },
-        { "label": "A6X 8/128", "match": { "model_type": ["A6X"], "item_contains": ["8/128"] } },
-        { "label": "Other A6X", "match": { "model_type": ["A6X"] }, "exclude": { "item_contains": ["8/128"] } },
-        { "label": "A6S", "match": { "model_type": ["A6S"] } },
-        { "label": "X9", "match": { "model_type": ["X9"] } }
+        {
+          "label": "All Device",
+          "total": true,
+          "match": {
+            "product_category": [
+              "Device"
+            ]
+          }
+        },
+        {
+          "label": "Reno 15",
+          "match": {
+            "model_type": [
+              "RENO 15"
+            ]
+          }
+        },
+        {
+          "label": "Reno 16",
+          "match": {
+            "model_type": [
+              "RENO 16"
+            ]
+          }
+        },
+        {
+          "label": "A7 PRO",
+          "match": {
+            "model_type": [
+              "A7 PRO"
+            ]
+          }
+        },
+        {
+          "label": "A6X 8/128",
+          "match": {
+            "model_type": [
+              "A6X"
+            ],
+            "item_contains": [
+              "8/128"
+            ]
+          }
+        },
+        {
+          "label": "Other A6X",
+          "match": {
+            "model_type": [
+              "A6X"
+            ]
+          },
+          "exclude": {
+            "item_contains": [
+              "8/128"
+            ]
+          }
+        },
+        {
+          "label": "A6S",
+          "match": {
+            "model_type": [
+              "A6S"
+            ]
+          }
+        },
+        {
+          "label": "X9",
+          "match": {
+            "model_type": [
+              "X9"
+            ]
+          }
+        }
       ]
     },
     {
       "id": "vivo",
       "name": "VIVO",
-      "filter": { "brand": ["VIVO"] },
+      "filter": {
+        "brand": [
+          "VIVO"
+        ]
+      },
+      "drill": "model_type_detail",
       "columns": [
-        { "label": "All Device", "total": true, "match": { "product_category": ["Device"] } },
-        { "label": "V80 Lite", "match": { "model_type_detail": ["V80 LITE"] } },        
-        { "label": "V70", "match": { "model_type": ["V70"] } },
-        { "label": "Y05", "match": { "model_type_detail": ["Y05"] } },
-        { "label": "Y05E", "match": { "model_type_detail": ["Y05E"] } },
-        { "label": "Y31D", "match": { "model_type": ["Y31"] } },
-        { "label": "Y500", "match": { "model_type": ["Y500"] } },
-        { "label": "X300", "match": { "model_type": ["X300"] } }
+        {
+          "label": "All Device",
+          "total": true,
+          "match": {
+            "product_category": [
+              "Device"
+            ]
+          }
+        },
+        {
+          "label": "V80 Lite",
+          "match": {
+            "model_type_detail": [
+              "V80 LITE"
+            ]
+          }
+        },
+        {
+          "label": "V70",
+          "match": {
+            "model_type": [
+              "V70"
+            ]
+          }
+        },
+        {
+          "label": "Y05",
+          "match": {
+            "model_type_detail": [
+              "Y05"
+            ]
+          }
+        },
+        {
+          "label": "Y05E",
+          "match": {
+            "model_type_detail": [
+              "Y05E"
+            ]
+          }
+        },
+        {
+          "label": "Y31D",
+          "match": {
+            "model_type": [
+              "Y31"
+            ]
+          }
+        },
+        {
+          "label": "Y500",
+          "match": {
+            "model_type": [
+              "Y500"
+            ]
+          }
+        },
+        {
+          "label": "X300",
+          "match": {
+            "model_type": [
+              "X300"
+            ]
+          }
+        }
       ]
     },
     {
       "id": "operator",
       "name": "OPERATOR & RC",
-      "filter": { "product_category": ["Operator", "Repair Contract"] },
+      "filter": {
+        "product_category": [
+          "Operator",
+          "Repair Contract"
+        ]
+      },
+      "drill": "brand",
+      "brand_filter": true,
       "columns": [
-        { "label": "All Operator", "total": true, "match": { "product_category": ["Operator"] } },
-        { "label": "Telkomsel", "match": { "detail_cat": ["TELKOMSEL"] } },
-        { "label": "Indosat", "match": { "detail_cat": ["INDOSAT"] } },
-        { "label": "XL", "match": { "detail_cat": ["XL AXIATA"] } },
-        { "label": "Repair Contract", "match": { "product_category": ["Repair Contract"] } }
+        {
+          "label": "All Operator",
+          "total": true,
+          "match": {
+            "product_category": [
+              "Operator"
+            ]
+          }
+        },
+        {
+          "label": "Telkomsel",
+          "match": {
+            "detail_cat": [
+              "TELKOMSEL"
+            ]
+          }
+        },
+        {
+          "label": "Indosat",
+          "match": {
+            "detail_cat": [
+              "INDOSAT"
+            ]
+          }
+        },
+        {
+          "label": "XL",
+          "match": {
+            "detail_cat": [
+              "XL AXIATA"
+            ]
+          }
+        },
+        {
+          "label": "Repair Contract",
+          "match": {
+            "product_category": [
+              "Repair Contract"
+            ]
+          }
+        }
       ]
     },
     {
       "id": "acc",
       "name": "ACC",
-      "filter": { "product_category": ["Accessories"] },
+      "filter": {
+        "product_category": [
+          "Accessories"
+        ]
+      },
+      "drill": "brand",
+      "brand_filter": true,
       "columns": [
-        { "label": "All Accessories", "total": true, "match": {} },
-        { "label": "Acc Apple", "match": { "rofo_category": ["Accs Apple"] } },
-        { "label": "Acc Samsung", "match": { "rofo_category": ["Accs Samsung"] } },
-        { "label": "Acc C-Brand", "match": { "rofo_category": ["Accs C-Brand"] } },
-        { "label": "Acc 3rd Party", "match": { "rofo_category": ["Accs 3rd party"] } },
-        { "label": "Acc Private Label", "match": { "rofo_category": ["Private Label"] } },
-        { "label": "Acc Lifestyle", "match": { "rofo_category": ["Accs Lifestyle"] } }
+        {
+          "label": "All Accessories",
+          "total": true,
+          "match": {}
+        },
+        {
+          "label": "Acc Apple",
+          "match": {
+            "rofo_category": [
+              "Accs Apple"
+            ]
+          }
+        },
+        {
+          "label": "Acc Samsung",
+          "match": {
+            "rofo_category": [
+              "Accs Samsung"
+            ]
+          }
+        },
+        {
+          "label": "Acc C-Brand",
+          "match": {
+            "rofo_category": [
+              "Accs C-Brand"
+            ]
+          }
+        },
+        {
+          "label": "Acc 3rd Party",
+          "match": {
+            "rofo_category": [
+              "Accs 3rd party"
+            ]
+          }
+        },
+        {
+          "label": "Acc Private Label",
+          "match": {
+            "rofo_category": [
+              "Private Label"
+            ]
+          }
+        },
+        {
+          "label": "Acc Lifestyle",
+          "match": {
+            "rofo_category": [
+              "Accs Lifestyle"
+            ]
+          }
+        }
       ]
     }
   ]
