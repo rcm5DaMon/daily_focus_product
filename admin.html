@@ -66,6 +66,9 @@
       <label class="f">Dashboard title<input type="text" id="gTitle"></label>
       <div class="muted" style="margin-bottom:6px">Default filter (a column can override a key, e.g. Ket PO = PO for a pre-order column)</div>
       <div id="gFilter"></div>
+      <div class="muted" style="margin:12px 0 6px">"Show stores with no sales" (Region 5 table) only lists stores with:</div>
+      <label class="f">Status<input type="text" id="gZStatus" placeholder="e.g. Active"></label>
+      <label class="f">BU category<input type="text" id="gZBu" placeholder="e.g. 1MULTIBRAND (blank = all BU)"></label>
     </div>
   </aside>
 
@@ -184,6 +187,14 @@ function renderTabs() {
 function renderGlobal() {
   $("gTitle").value = CFG.title || "";
   const g = $("gFilter"); g.innerHTML = "";
+  const z = CFG.zero_sales_store_filter || {};
+  $("gZStatus").value = (z.status || []).join(", "); $("gZBu").value = (z.bu_category || []).join(", ");
+  const setZ = () => {
+    const sp = v => v.split(",").map(x => x.trim()).filter(Boolean);
+    CFG.zero_sales_store_filter = { status: sp($("gZStatus").value), bu_category: sp($("gZBu").value) };
+    save();
+  };
+  $("gZStatus").onchange = setZ; $("gZBu").onchange = setZ;
   g.append(condEditor(CFG.default_filter, o => { CFG.default_filter = o; renderTab(); renderVals(); save(); }, { defaultKey: "ket_po" }));
 }
 
@@ -209,6 +220,12 @@ function renderTab() {
         <button class="btn sm" id="tUp">↑</button><button class="btn sm" id="tDown">↓</button>
         <button class="btn sm x" id="tDel">Delete tab</button></div>
     </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:8px">
+      <label class="f" style="width:220px">Column drill-down (Region 5 table) by
+        <select id="tDrill">${Object.entries(DRILL_LABELS).map(([k, v]) => `<option value="${k}"${(t.drill || "model_type_detail") === k ? " selected" : ""}>${v}</option>`).join("")}</select></label>
+      <label class="f" style="flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-weight:500;font-size:12px">
+        <input type="checkbox" id="tBrand"${t.brand_filter ? " checked" : ""}> Show Brand filter on this tab</label>
+    </div>
     <div class="muted" style="margin:4px 0 6px">Tab filter: every column in this tab only counts items that match this (e.g. Brand = OPPO)</div>
     <div id="tFilter"></div>
     <h2 style="margin-top:16px">Columns <span class="muted" style="text-transform:none">· left to right · the column ticked "All" gets the bold divider</span></h2>
@@ -216,6 +233,8 @@ function renderTab() {
     <tbody id="cols"></tbody></table>
     <button class="btn sm" id="cAdd" style="margin-top:8px">+ Add column</button>`;
   $("tFilter").append(condEditor(t.filter, o => { t.filter = o; renderTab(); renderVals(); save(); }, { defaultKey: "brand" }));
+  $("tDrill").onchange = e => { t.drill = e.target.value; save(); };
+  $("tBrand").onchange = e => { if (e.target.checked) t.brand_filter = true; else delete t.brand_filter; save(); };
   $("tName").onchange = e => { t.name = e.target.value.trim() || t.name; renderTabs(); save(); };
   $("tId").onchange = e => { t.id = e.target.value.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-") || t.id; save(); };
   $("tUp").onclick = () => moveTab(-1); $("tDown").onclick = () => moveTab(1);
@@ -283,7 +302,7 @@ function renderVals() {
 function wire() {
   buildDatalists();
   $("tabList").onclick = e => { const b = e.target.closest("button"); if (!b) return; cur = +b.dataset.i; selCol = -1; renderTabs(); renderTab(); renderVals(); };
-  $("bAddTab").onclick = () => { CFG.tabs.push({ id: "new" + CFG.tabs.length, name: "NEW TAB", filter: { brand: [] }, columns: [{ label: "All Device", total: true, match: { product_category: ["Device"] } }] }); cur = CFG.tabs.length - 1; selCol = -1; renderAll(); };
+  $("bAddTab").onclick = () => { CFG.tabs.push({ id: "new" + CFG.tabs.length, name: "NEW TAB", filter: { brand: [] }, drill: "model_type_detail", columns: [{ label: "All Device", total: true, match: { product_category: ["Device"] } }] }); cur = CFG.tabs.length - 1; selCol = -1; renderAll(); };
   $("gTitle").onchange = e => { CFG.title = e.target.value; save(); };
   $("vField").onchange = renderVals; $("vQ").oninput = renderVals;
   $("vals").onclick = e => {

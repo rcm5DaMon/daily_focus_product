@@ -6,7 +6,11 @@ OPERATOR & RC, ACC), each with the same layout:
 - **Last Update / Last Time**: date of the data and the latest PAID transaction time in `sales_daily`
 - **Sales all region**: qty per region (Corporate, Region 1-6, Service Center)
 - **Region 5**: qty per LOB > TSH > store, with subtotals, filters for LOB, TSH and site desc, store search,
-  sort by any column and CSV download
+  sort by any column and CSV download. Every column has a **+ / −** drill-down that splits it into
+  model type detail (brand tabs) or brand (OPERATOR & RC, ACC). "Drill down all columns" opens them all.
+- **Brand filter** on OPERATOR & RC and ACC, filtering both tables
+- **Show stores with no sales** lists only Active stores with BU category 1MULTIBRAND
+  (set in `zero_sales_store_filter` in the config, or in the back end)
 
 Same setup as `sbd_vivo`: **import mode**. One BigQuery query pulls the day's sales into `data/daily.json`;
 every tab, filter and sort then runs in the browser at zero BigQuery cost.
@@ -31,10 +35,11 @@ Open `admin.html` (the **Edit columns** button on the dashboard).
 2. Each **column** counts items that match all of its conditions. A condition is a field + one or more values
    (comma separated, OR between values). Fields: Brand, Product category, Detail category, **Model type**,
    **Model type detail**, ROFO category, Ket PO, Line, Item description contains.
-3. **Exclude rule** removes matching items from a column (e.g. "Other A6X" = Model type A6X, excluding item description containing 8/128).
-4. The right-hand list shows every value sold today inside the tab filter. **+ col** makes it a new column,
+3. **Drill-down by** (per tab) sets what a column splits into in the Region 5 table; **Show Brand filter** adds the Brand dropdown.
+4. **Exclude rule** removes matching items from a column (e.g. "Other A6X" = Model type A6X, excluding item description containing 8/128).
+5. The right-hand list shows every value sold today inside the tab filter. **+ col** makes it a new column,
    **+ sel** adds it to the selected column. The two numbers next to each column (All regions, R5) update as you edit.
-5. **Preview dashboard** shows your draft without publishing. **Publish…** -> Copy JSON -> paste into
+6. **Preview dashboard** shows your draft without publishing. **Publish…** -> Copy JSON -> paste into
    `config/focus_products.json` on GitHub -> Commit. The site redeploys in about a minute; no query needed.
 
 You can also edit `config/focus_products.json` directly. Example column:

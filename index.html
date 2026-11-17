@@ -47,6 +47,15 @@
   .msg{padding:40px;text-align:center;color:var(--muted)}
   .note{font-size:11px;color:var(--muted);margin-top:8px}
   th .arr{font-size:9px;color:var(--muted)}
+  th .dr{border:1px solid #c5cad3;background:#fff;border-radius:3px;font:700 10px monospace;padding:0 3px;margin-left:4px;cursor:pointer;color:var(--ink)}
+  th .dr:hover{border-color:var(--accent)}
+  th.subc{background:#f7f9fc;font-weight:500;font-size:11px;color:#4a5263;border-bottom-color:#9aa1ad}
+  td.subc{background:#fbfcfe;color:#4a5263}
+  tr.sub td.subc,tr.lobsub td.subc,tr.grand td.subc{color:var(--ink)}
+  th.par{background:#eef3fb}
+  .bar{display:flex;gap:12px;align-items:flex-end;margin:0 0 14px;flex-wrap:wrap}
+  .bar label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .bar select{font:13px system-ui;padding:6px 8px;border:1px solid var(--line);border-radius:5px;min-width:200px;background:#fff}
   @media (max-width:700px){h1{font-size:16px}.stamp b{font-size:16px}}
 </style>
 </head>
@@ -65,8 +74,8 @@
 <script src="assets/engine.js"></script>
 <script>
 "use strict";
-let DATA, CONFIG, TAB, VALS, isDraft = false;
-const state = { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1, collapsed: new Set() };
+let DATA, CONFIG, TAB, VALS, SUB, BRANDS = [], isDraft = false;
+const state = { brand: "", lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1, collapsed: new Set(), exp: new Set() };
 
 (async function init() {
   try {
@@ -97,16 +106,27 @@ function selectTab() {
   const id = decodeURIComponent(location.hash.slice(1));
   TAB = CONFIG.tabs.find(t => t.id === id) || CONFIG.tabs[0];
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.id === TAB.id));
-  VALS = computeTab(DATA, CONFIG, TAB);
-  state.sortCol = -1; state.collapsed.clear();
-  render();
+  BRANDS = TAB.brand_filter ? tabBrands(DATA, CONFIG, TAB) : [];
+  state.brand = ""; state.sortCol = -1; state.collapsed.clear(); state.exp.clear();
+  recompute(); render();
+}
+function recompute() {
+  const r = computeTab(DATA, CONFIG, TAB, { sub: true, brand: state.brand });
+  VALS = r.vals; SUB = r.sub;
 }
 
 function sumInto(acc, v) { for (let i = 0; i < acc.length; i++) acc[i] += v[i]; }
 const nonzero = v => v && v.some(x => x);
+const drillName = () => DRILL_LABELS[TAB.drill || "model_type_detail"] || "detail";
 
 function render() {
   const n = TAB.columns.length;
+  const brandTxt = state.brand ? ` · brand ${esc(state.brand)}` : "";
+  // ---------- Brand filter (tabs with brand_filter) ----------
+  const brandBar = TAB.brand_filter ? `
+    <div class="bar"><label>Brand<select id="fBrand"><option value="">All brands</option>${BRANDS.map(b => `<option${b === state.brand ? " selected" : ""}>${esc(b)}</option>`).join("")}</select></label>
+      <span class="note">Filters both tables. In the Region 5 table, click ⊞ on a column to split it by brand.</span></div>` : "";
+
   // ---------- Region table ----------
   const byRegion = new Map();
   for (const [site, v] of VALS) {
@@ -117,10 +137,10 @@ function render() {
   }
   const regions = [...byRegion.keys()].sort((a, b) => regionRank(a) - regionRank(b) || a.localeCompare(b));
   const gt = new Float64Array(n); regions.forEach(r => sumInto(gt, byRegion.get(r)));
-  const head = TAB.columns.map((c, i) => `<th class="${c.total ? "tot" : ""}">${esc(c.label)}</th>`).join("");
+  const head = TAB.columns.map(c => `<th class="${c.total ? "tot" : ""}">${esc(c.label)}</th>`).join("");
   const cells = v => TAB.columns.map((c, i) => `<td class="${c.total ? "tot" : ""}">${fmt(v[i])}</td>`).join("");
   const regionHTML = `
-    <div class="card"><h2>Sales all region <small>${esc(TAB.name)} · qty sold today</small></h2>
+    <div class="card"><h2>Sales all region <small>${esc(TAB.name)}${brandTxt} · qty sold today</small></h2>
     <div class="scroll"><table>
       <thead><tr><th class="l">Region</th>${head}</tr></thead>
       <tbody>${regions.map(r => `<tr class="${r === "REGION 5" ? "r5" : ""}"><td class="l">${esc(r)}</td>${cells(byRegion.get(r))}</tr>`).join("")
@@ -128,9 +148,9 @@ function render() {
         <tr class="grand"><td class="l">Total</td>${cells(gt)}</tr></tbody>
     </table></div></div>`;
 
-  // ---------- Region 5 table ----------
+  // ---------- Region 5 table: stores ----------
   let r5 = [...DATA.stores.values()].filter(s => s.region === "REGION 5");
-  r5 = r5.filter(s => nonzero(VALS.get(s.site)) || (state.zero && s.status === "Active"));
+  r5 = r5.filter(s => nonzero(VALS.get(s.site)) || (state.zero && zeroSalesStore(CONFIG, s)));
   const lobs = [...new Set(r5.map(s => s.lob || "(no LOB)"))].sort();
   if (state.lob && !lobs.includes(state.lob)) state.lob = "";
   const r5a = r5.filter(s => !state.lob || (s.lob || "(no LOB)") === state.lob);
@@ -142,14 +162,37 @@ function render() {
   const q = state.q.trim().toUpperCase();
   const shown = r5b.filter(s => (!state.site || s.site === state.site) && (!q || s.desc.toUpperCase().includes(q) || s.site.toUpperCase().includes(q)));
 
+  // ---------- Region 5 table: columns, with drill-down ----------
+  // spec = list of displayed columns: {i, key:null} = the column itself, {i, key} = one drill value inside column i
+  const spec = [];
+  const subKeys = TAB.columns.map((c, i) => {
+    const m = new Map();
+    for (const s of shown) { const sr = SUB.get(s.site); if (sr) for (const [k, v] of sr[i]) m.set(k, (m.get(k) || 0) + v); }
+    return [...m.entries()].filter(e => e[1]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(e => e[0]);
+  });
+  TAB.columns.forEach((c, i) => {
+    spec.push({ i, key: null });
+    if (state.exp.has(i)) subKeys[i].forEach(k => spec.push({ i, key: k }));
+  });
+  const zeroN = new Float64Array(spec.length);
+  const vecCache = new Map();
+  const vec = s => {
+    let v = vecCache.get(s.site); if (v) return v;
+    const base = VALS.get(s.site), sr = SUB.get(s.site);
+    v = new Float64Array(spec.length);
+    if (base) spec.forEach((c, j) => { v[j] = c.key === null ? base[c.i] : (sr[c.i].get(c.key) || 0); });
+    vecCache.set(s.site, v); return v;
+  };
+  const cls = c => c.key !== null ? "subc" : (TAB.columns[c.i].total ? "tot" : "");
+  const cells5 = v => spec.map((c, j) => `<td class="${cls(c)}">${fmt(v[j])}</td>`).join("");
+  if (state.sortCol >= spec.length) state.sortCol = -1;
+  const sc = state.sortCol;
+
   const opt = (vals, cur, all) => `<option value="">${all}</option>` + vals.map(v => `<option${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("");
   const siteOpt = `<option value="">All</option>` + sites.map(s => `<option value="${esc(s.site)}"${s.site === state.site ? " selected" : ""}>${esc(s.desc)}</option>`).join("");
 
   // group LOB -> TSH -> sites
-  const zero = new Float64Array(n);
-  const val = s => VALS.get(s.site) || zero;
-  const sc = state.sortCol;
-  const sortSites = arr => arr.sort(sc >= 0 ? (a, b) => val(b)[sc] - val(a)[sc] || a.desc.localeCompare(b.desc) : (a, b) => a.desc.localeCompare(b.desc));
+  const sortSites = arr => arr.sort(sc >= 0 ? (a, b) => vec(b)[sc] - vec(a)[sc] || a.desc.localeCompare(b.desc) : (a, b) => a.desc.localeCompare(b.desc));
   const tree = new Map();
   for (const s of shown) {
     const L = s.lob || "(no LOB)", T = s.tsh || "(no TSH)";
@@ -157,52 +200,66 @@ function render() {
     if (!tree.get(L).has(T)) tree.get(L).set(T, []);
     tree.get(L).get(T).push(s);
   }
-  let rows = "", grand = new Float64Array(n);
+  let rows = "", grand = new Float64Array(spec.length);
   for (const L of [...tree.keys()].sort()) {
-    const lobTot = new Float64Array(n), lk = "L|" + L, lc = state.collapsed.has(lk);
+    const lobTot = new Float64Array(spec.length), lk = "L|" + L, lc = state.collapsed.has(lk);
     let lobRows = "";
     for (const T of [...tree.get(L).keys()].sort()) {
       const list = sortSites(tree.get(L).get(T)), tk = "T|" + L + "|" + T, tc = state.collapsed.has(tk);
-      const tTot = new Float64Array(n);
-      list.forEach(s => sumInto(tTot, val(s)));
+      const tTot = new Float64Array(spec.length);
+      list.forEach(s => sumInto(tTot, vec(s)));
       sumInto(lobTot, tTot);
       if (lc) continue;
-      if (!tc) lobRows += list.map(s => `<tr><td class="l dim">${esc(L)}</td><td class="l dim">${esc(T)}</td><td class="l" title="${esc(s.site)}">${esc(s.desc)}</td>${cells(val(s))}</tr>`).join("");
-      lobRows += `<tr class="sub"><td class="l dim">${esc(L)}</td><td class="l"><button class="tg" data-k="${esc(tk)}">${tc ? "⊞" : "⊟"}</button>${esc(T)}</td><td class="l">Total${tc ? ` <span class="dim">(${list.length} stores)</span>` : ""}</td>${cells(tTot)}</tr>`;
+      if (!tc) lobRows += list.map(s => `<tr><td class="l dim">${esc(L)}</td><td class="l dim">${esc(T)}</td><td class="l" title="${esc(s.site)}">${esc(s.desc)}</td>${cells5(vec(s))}</tr>`).join("");
+      lobRows += `<tr class="sub"><td class="l dim">${esc(L)}</td><td class="l"><button class="tg" data-k="${esc(tk)}">${tc ? "⊞" : "⊟"}</button>${esc(T)}</td><td class="l">Total${tc ? ` <span class="dim">(${list.length} stores)</span>` : ""}</td>${cells5(tTot)}</tr>`;
     }
     sumInto(grand, lobTot);
-    rows += lobRows + `<tr class="lobsub"><td class="l"><button class="tg" data-k="${esc(lk)}">${lc ? "⊞" : "⊟"}</button>${esc(L)}</td><td class="l">Total</td><td></td>${cells(lobTot)}</tr>`;
+    rows += lobRows + `<tr class="lobsub"><td class="l"><button class="tg" data-k="${esc(lk)}">${lc ? "⊞" : "⊟"}</button>${esc(L)}</td><td class="l">Total</td><td></td>${cells5(lobTot)}</tr>`;
   }
-  const head5 = TAB.columns.map((c, i) => `<th class="${c.total ? "tot" : ""}" data-sort="${i}" title="Sort stores by ${esc(c.label)}">${esc(c.label)} <span class="arr">${sc === i ? "▼" : ""}</span></th>`).join("");
+  const head5 = spec.map((c, j) => {
+    const arr = `<span class="arr">${sc === j ? "▼" : ""}</span>`;
+    if (c.key !== null) return `<th class="subc" data-sort="${j}" title="${esc(TAB.columns[c.i].label)} › ${esc(c.key)}">${esc(c.key)} ${arr}</th>`;
+    const col = TAB.columns[c.i], open = state.exp.has(c.i), can = subKeys[c.i].length > 0;
+    const btn = can ? `<button class="dr" data-dr="${c.i}" title="${open ? "Collapse" : "Drill down by " + esc(drillName())}">${open ? "−" : "+"}</button>` : "";
+    return `<th class="${col.total ? "tot" : ""}${open ? " par" : ""}" data-sort="${j}" title="Sort stores by ${esc(col.label)}">${esc(col.label)}${btn} ${arr}</th>`;
+  }).join("");
+  const anyOpen = state.exp.size > 0;
+  const zeroTxt = describeZero();
   const r5HTML = `
-    <div class="card"><h2>Region 5 <small>${esc(TAB.name)} · by LOB, TSH and store · ${shown.length} stores</small></h2>
+    <div class="card"><h2>Region 5 <small>${esc(TAB.name)}${brandTxt} · by LOB, TSH and store · ${shown.length} stores</small></h2>
       <div class="filters">
         <label>LOB<select id="fLob">${opt(lobs, state.lob, "All")}</select></label>
         <label>TSH<select id="fTsh">${opt(tshs, state.tsh, "All")}</select></label>
         <label>Site desc<select id="fSite">${siteOpt}</select></label>
         <label>Search store<input type="search" id="fQ" placeholder="name or site code" value="${esc(state.q)}"></label>
-        <label class="chk"><input type="checkbox" id="fZero"${state.zero ? " checked" : ""}>&nbsp;Show active stores with no sales</label>
+        <label class="chk" title="${esc(zeroTxt)}"><input type="checkbox" id="fZero"${state.zero ? " checked" : ""}>&nbsp;Show ${esc(zeroTxt)} with no sales</label>
+        <button class="btn" id="fExp">${anyOpen ? "Collapse all columns" : "Drill down all columns"}</button>
         <button class="btn" id="fReset">Reset</button>
         <button class="btn" id="fCsv">Download CSV</button>
       </div>
       <div class="scroll"><table id="t5">
         <thead><tr><th class="l" data-sort="-1">LOB</th><th class="l" data-sort="-1">TSH</th><th class="l" data-sort="-1">SITE DESC</th>${head5}</tr></thead>
-        <tbody>${rows || `<tr><td class="l" colspan="${n + 3}">No Region 5 sales for this selection.</td></tr>`}
-          <tr class="grand"><td class="l">Total</td><td></td><td></td>${cells(grand)}</tr></tbody>
+        <tbody>${rows || `<tr><td class="l" colspan="${spec.length + 3}">No Region 5 sales for this selection.</td></tr>`}
+          <tr class="grand"><td class="l">Total</td><td></td><td></td>${cells5(grand)}</tr></tbody>
       </table></div>
-      <div class="note">Qty = PAID, ${esc(describeDefault())}. Click a column header to sort stores by it, click ⊟ to collapse a LOB or TSH.</div>
+      <div class="note">Qty = PAID, ${esc(describeDefault())}. Click <b>+</b> on a column header to drill it down by ${esc(drillName().toLowerCase())} (shaded columns), <b>−</b> to close.
+        Click a header to sort stores by it, click ⊟ to collapse a LOB or TSH.</div>
     </div>`;
 
-  document.getElementById("main").innerHTML = regionHTML + r5HTML;
+  document.getElementById("main").innerHTML = brandBar + regionHTML + r5HTML;
   const $ = id => document.getElementById(id);
+  if ($("fBrand")) $("fBrand").onchange = e => { state.brand = e.target.value; state.sortCol = -1; recompute(); render(); };
   $("fLob").onchange = e => { state.lob = e.target.value; state.tsh = ""; state.site = ""; render(); };
   $("fTsh").onchange = e => { state.tsh = e.target.value; state.site = ""; render(); };
   $("fSite").onchange = e => { state.site = e.target.value; render(); };
   $("fQ").oninput = e => { state.q = e.target.value; clearTimeout(window._qt); window._qt = setTimeout(() => { render(); const el = $("fQ"); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }, 250); };
   $("fZero").onchange = e => { state.zero = e.target.checked; render(); };
-  $("fReset").onclick = () => { Object.assign(state, { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1 }); state.collapsed.clear(); render(); };
-  $("fCsv").onclick = () => downloadCsv(shown, val);
+  $("fExp").onclick = () => { if (anyOpen) state.exp.clear(); else TAB.columns.forEach((c, i) => state.exp.add(i)); state.sortCol = -1; render(); };
+  $("fReset").onclick = () => { Object.assign(state, { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1 }); state.collapsed.clear(); state.exp.clear(); render(); };
+  $("fCsv").onclick = () => downloadCsv(shown, vec, spec);
   $("t5").onclick = e => {
+    const d = e.target.closest(".dr");
+    if (d) { const i = +d.dataset.dr; state.exp.has(i) ? state.exp.delete(i) : state.exp.add(i); state.sortCol = -1; render(); return; }
     const b = e.target.closest(".tg");
     if (b) { const k = b.dataset.k; state.collapsed.has(k) ? state.collapsed.delete(k) : state.collapsed.add(k); render(); return; }
     const th = e.target.closest("th[data-sort]");
@@ -214,15 +271,21 @@ function describeDefault() {
   const d = CONFIG.default_filter || {};
   return Object.entries(d).map(([k, v]) => `${FIELD_LABELS[k] || k} = ${v.join(" / ")}`).join(", ") || "no default filter";
 }
+function describeZero() {
+  const r = CONFIG.zero_sales_store_filter || { status: ["Active"] };
+  const st = (r.status || []).join("/"), bu = (r.bu_category || []).join("/");
+  return [st && st.toLowerCase(), bu, "stores"].filter(Boolean).join(" ");
+}
 
-function downloadCsv(list, val) {
+function downloadCsv(list, vec, spec) {
   const q = s => `"${String(s).replace(/"/g, '""')}"`;
-  const lines = [["LOB", "TSH", "Site Code", "Site Desc", ...TAB.columns.map(c => c.label)].map(q).join(",")];
+  const names = spec.map(c => c.key === null ? TAB.columns[c.i].label : TAB.columns[c.i].label + " > " + c.key);
+  const lines = [["LOB", "TSH", "Site Code", "Site Desc", ...names].map(q).join(",")];
   [...list].sort((a, b) => (a.lob + a.tsh + a.desc).localeCompare(b.lob + b.tsh + b.desc))
-    .forEach(s => lines.push([s.lob, s.tsh, s.site, s.desc].map(q).concat([...val(s)].map(x => Math.round(x))).join(",")));
+    .forEach(s => lines.push([s.lob, s.tsh, s.site, s.desc].map(q).concat([...vec(s)].map(x => Math.round(x))).join(",")));
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\n")], { type: "text/csv" }));
-  a.download = `focus_${TAB.id}_R5_${(DATA.raw.data_date || "").replace(/\//g, "")}.csv`;
+  a.download = `focus_${TAB.id}${state.brand ? "_" + state.brand : ""}_R5_${(DATA.raw.data_date || "").replace(/\//g, "")}.csv`;
   a.click();
 }
 </script>
