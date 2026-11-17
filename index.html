@@ -5,61 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Report Daily Focus Product</title>
 <style>
+  /* ===== iPhone 18 Pro "Glacier" theme: ice blue, frosted glass, deep steel-blue ink ===== */
   :root{
-    --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#6b7385; --line:#e3e6ec; --soft:#f1f3f6;
-    --accent:#1f2937; --hi:#fff7e0; --r5:#e8f1ff; --link:#2457c5;
+    --ice-0:#f4f9fc; --ice-1:#e6f1f8; --ice-2:#d3e6f2; --ice-3:#b9d6ea; --ice-4:#8fbadb;
+    --glacier:#6fa3cc; --glacier-deep:#3f78a6; --steel:#24506f; --ink:#152b3c; --muted:#5d7488;
+    --glass:rgba(255,255,255,.72); --glass-strong:rgba(255,255,255,.88); --edge:rgba(255,255,255,.95);
+    --line:rgba(63,120,166,.14); --shadow:0 10px 34px rgba(36,80,111,.13);
+    --lvl0:#d6e8f4; --lvl1:#e9f3f9; --hi:#e2f0fa;
   }
   *{box-sizing:border-box}
-  body{margin:0;font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;position:sticky;top:0;z-index:5}
-  .stamp{display:flex;gap:22px}
-  .stamp b{display:block;font-size:20px;letter-spacing:.2px}
-  .stamp span{color:var(--muted);font-size:12px}
-  .tabs{display:flex;flex-wrap:wrap;gap:6px}
-  .tabs button{border:1px solid #9aa1ad;background:#fff;color:var(--ink);padding:8px 14px;font:600 12px system-ui;cursor:pointer;min-width:78px;border-radius:3px}
-  .tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-  h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.3px;flex:1;min-width:240px}
+  html,body{margin:0;min-height:100%}
+  body{font:13px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 600px at 85% -10%,#ffffff 0%,rgba(255,255,255,0) 60%),
+               linear-gradient(160deg,#f2f8fc 0%,#e1eef7 38%,#cfe3f1 72%,#bcd7ea 100%) fixed;}
+  #shotArea{min-height:100vh;display:flex;flex-direction:column;background:inherit}
+  header{position:sticky;top:0;z-index:20;padding:14px 24px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;
+    background:rgba(244,249,252,.78);backdrop-filter:saturate(170%) blur(18px);-webkit-backdrop-filter:saturate(170%) blur(18px);
+    border-bottom:1px solid var(--edge);box-shadow:0 1px 0 var(--line)}
+  .stamp{display:flex;gap:10px}
+  .stamp div{background:var(--glass-strong);border:1px solid var(--edge);border-radius:14px;padding:6px 14px;box-shadow:0 2px 10px rgba(36,80,111,.07)}
+  .stamp b{display:block;font-size:19px;letter-spacing:-.2px;color:var(--steel);font-weight:700}
+  .stamp span{color:var(--muted);font-size:11px;letter-spacing:.2px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;padding:4px;background:rgba(255,255,255,.55);border:1px solid var(--edge);border-radius:999px}
+  .tabs button{border:0;background:transparent;color:var(--steel);padding:8px 15px;font:600 12px inherit;font-family:inherit;cursor:pointer;border-radius:999px;letter-spacing:.2px}
+  .tabs button:hover{background:rgba(255,255,255,.8)}
+  .tabs button.on{background:linear-gradient(135deg,#8fc1e3 0%,#5f97c4 55%,#3f78a6 100%);color:#fff;box-shadow:0 4px 14px rgba(63,120,166,.35)}
+  h1{margin:0;font-size:19px;font-weight:800;letter-spacing:.4px;flex:1;min-width:230px;
+    background:linear-gradient(90deg,#24506f,#5f97c4);-webkit-background-clip:text;background-clip:text;color:transparent}
   .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .chip{font-size:11px;color:var(--muted);background:var(--soft);border-radius:20px;padding:3px 10px}
-  .btn{font:600 12px system-ui;border:1px solid var(--line);background:#fff;color:var(--ink);padding:6px 11px;border-radius:6px;text-decoration:none;cursor:pointer}
-  .btn:hover{border-color:#9aa1ad}
-  main{padding:18px 20px 40px;max-width:1500px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:18px}
-  .card h2{margin:0 0 10px;font-size:14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-  .card h2 small{font-weight:400;color:var(--muted)}
-  .scroll{overflow:auto;max-height:70vh}
-  table{border-collapse:collapse;width:max-content;min-width:100%}
-  th,td{padding:5px 10px;border-bottom:1px solid var(--soft);white-space:nowrap}
-  th{position:sticky;top:0;background:#fff;z-index:2;font-weight:600;text-align:right;border-bottom:2px solid var(--accent);cursor:pointer;user-select:none}
+  .chip{font-size:11px;color:var(--muted);background:var(--glass-strong);border:1px solid var(--edge);border-radius:999px;padding:4px 11px}
+  .btn{font:600 12px inherit;font-family:inherit;border:1px solid var(--edge);background:var(--glass-strong);color:var(--steel);padding:7px 12px;border-radius:10px;
+    text-decoration:none;cursor:pointer;box-shadow:0 1px 4px rgba(36,80,111,.08);white-space:nowrap}
+  .btn:hover{background:#fff;border-color:var(--ice-3)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .btn.pri{background:linear-gradient(135deg,#7fb4da,#3f78a6);color:#fff;border-color:transparent}
+  main{flex:1;width:100%;padding:18px 24px 30px}
+  .card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--edge);border-radius:20px;
+    padding:16px 18px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 12px;font-size:15px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;color:var(--steel)}
+  .card h2 small{font-weight:500;color:var(--muted);font-size:12px}
+  .scroll{overflow:auto;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.6)}
+  #r5scroll{max-height:calc(100vh - 290px);min-height:320px}
+  table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed}
+  th{white-space:normal;line-height:1.25;vertical-align:bottom}
+  td.name,td.l{overflow:hidden;text-overflow:ellipsis}
+  th,td{padding:6px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{position:sticky;top:0;z-index:2;background:linear-gradient(180deg,#eaf4fa,#dcecf6);color:var(--steel);font-weight:650;text-align:right;
+    border-bottom:1px solid var(--ice-3);cursor:pointer;user-select:none;font-size:12px}
   th.l,td.l{text-align:left}
   td{text-align:right;font-variant-numeric:tabular-nums}
-  td.tot,th.tot{border-right:1px solid #9cc0f5;font-weight:700}
-  tr.r5 td{background:var(--r5)}
-  tr.sub td{font-weight:700;background:var(--soft)}
-  tr.lobsub td{font-weight:800;background:#e6e9ef}
-  tr.grand td{font-weight:800;border-top:2px solid var(--accent);background:#fff}
-  td.dim{color:#a0a6b2}
-  .tg{border:0;background:none;cursor:pointer;font:700 12px monospace;color:var(--muted);padding:0 4px 0 0}
-  .filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:12px}
-  .filters label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-  .filters select,.filters input[type=search]{font:13px system-ui;padding:6px 8px;border:1px solid var(--line);border-radius:5px;min-width:200px;background:#fff}
-  .filters .chk{flex-direction:row;align-items:center;text-transform:none;font-weight:500;font-size:12px;color:var(--ink)}
+  th.tot,td.tot{border-right:2px solid var(--ice-3);font-weight:700}
+  th.tot{color:var(--glacier-deep)}
+  tr.r5 td{background:var(--hi);font-weight:600}
+  tr.r5 td:first-child{box-shadow:inset 3px 0 0 var(--glacier)}
+  tr.grand td,tfoot td{font-weight:800;background:linear-gradient(180deg,#e3f0f8,#d4e7f3);color:var(--steel);border-top:1px solid var(--ice-3)}
+  tfoot td{position:sticky;bottom:0;z-index:1}
+  td.zero{color:#b0c2d0}
+  th .arr{font-size:9px;color:var(--glacier)}
+  /* hierarchy rows (Summit style) */
+  tr.g0 td{background:var(--lvl0);font-weight:750;color:var(--steel)}
+  tr.g1 td{background:var(--lvl1);font-weight:620}
+  tr.g0,tr.g1{cursor:pointer}
+  tr.g0:hover td,tr.g1:hover td{filter:brightness(.98)}
+  tr.st:hover td{background:#f3f9fd}
+  .caret{display:inline-block;width:14px;color:var(--glacier-deep);font-size:10px}
+  .lvl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-right:7px}
+  .site{color:var(--muted);font-size:11px;margin-right:7px;font-weight:500}
+  .cnt{color:var(--muted);font-weight:500}
+  /* controls */
+  .filters,.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:12px}
+  .filters label,.bar label{display:flex;flex-direction:column;font-size:10.5px;color:var(--muted);gap:4px;font-weight:650;text-transform:uppercase;letter-spacing:.4px}
+  select,input[type=search]{font:13px inherit;font-family:inherit;padding:7px 10px;border:1px solid var(--edge);border-radius:10px;min-width:190px;background:var(--glass-strong);color:var(--ink);
+    box-shadow:inset 0 1px 2px rgba(36,80,111,.06)}
+  select:focus,input:focus{outline:2px solid var(--ice-4);outline-offset:1px}
+  .filters .chk{flex-direction:row;align-items:center;text-transform:none;font-weight:550;font-size:12px;color:var(--ink);letter-spacing:0;gap:6px}
+  .chk input{accent-color:var(--glacier-deep);width:15px;height:15px}
+  .seg{display:inline-flex;background:rgba(255,255,255,.6);border:1px solid var(--edge);border-radius:10px;padding:3px;gap:2px}
+  .seg button{border:0;background:transparent;padding:5px 12px;border-radius:8px;font:600 12px inherit;font-family:inherit;color:var(--steel);cursor:pointer}
+  .seg button[aria-pressed=true]{background:linear-gradient(135deg,#8fc1e3,#3f78a6);color:#fff}
+  .lvlbtns{display:inline-flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);font-weight:600}
+  .grow{flex:1}
   .msg{padding:40px;text-align:center;color:var(--muted)}
-  .note{font-size:11px;color:var(--muted);margin-top:8px}
-  th .arr{font-size:9px;color:var(--muted)}
-  th .dr{border:1px solid #c5cad3;background:#fff;border-radius:3px;font:700 10px monospace;padding:0 3px;margin-left:4px;cursor:pointer;color:var(--ink)}
-  th .dr:hover{border-color:var(--accent)}
-  th.subc{background:#f7f9fc;font-weight:500;font-size:11px;color:#4a5263;border-bottom-color:#9aa1ad}
-  td.subc{background:#fbfcfe;color:#4a5263}
-  tr.sub td.subc,tr.lobsub td.subc,tr.grand td.subc{color:var(--ink)}
-  th.par{background:#eef3fb}
-  .bar{display:flex;gap:12px;align-items:flex-end;margin:0 0 14px;flex-wrap:wrap}
-  .bar label{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-  .bar select{font:13px system-ui;padding:6px 8px;border:1px solid var(--line);border-radius:5px;min-width:200px;background:#fff}
-  @media (max-width:700px){h1{font-size:16px}.stamp b{font-size:16px}}
+  .note{font-size:11px;color:var(--muted);margin-top:10px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:rgba(21,43,60,.92);color:#fff;padding:9px 16px;border-radius:12px;display:none;z-index:50;font-size:12px}
+  @media (max-width:760px){header{padding:10px 12px}main{padding:12px}h1{font-size:15px}.stamp b{font-size:15px}}
 </style>
 </head>
 <body>
+<div id="shotArea">
 <header>
   <div class="stamp">
     <div><b id="lastDate">-</b><span>Last Update</span></div>
@@ -70,12 +103,14 @@
   <div class="tools" id="tools"></div>
 </header>
 <main id="main"><div class="msg">Loading…</div></main>
+</div>
+<div class="toast" id="toast"></div>
 
 <script src="assets/engine.js"></script>
 <script>
 "use strict";
-let DATA, CONFIG, TAB, VALS, SUB, BRANDS = [], isDraft = false;
-const state = { brand: "", lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1, collapsed: new Set(), exp: new Set() };
+let DATA, CONFIG, TAB, VALS, BRANDS = [], isDraft = false;
+const state = { brand: "", lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1, lvl: 1, open: new Set() };
 
 (async function init() {
   try {
@@ -91,10 +126,18 @@ const state = { brand: "", lob: "", tsh: "", site: "", q: "", zero: false, sortC
   document.getElementById("lastDate").textContent = fmtDate(DATA.raw.data_date);
   document.getElementById("lastTime").textContent = DATA.raw.last_time || "-";
   document.getElementById("tools").innerHTML =
-    (isDraft ? `<span class="chip" style="background:#fff3c4;color:#7a5b00">Draft config preview (admin)</span>` : "") +
+    (isDraft ? `<span class="chip" style="background:#fff3c4;color:#7a5b00" data-noshot>Draft config preview</span>` : "") +
     `<span class="chip" title="When BigQuery was last queried">Imported ${esc((DATA.raw.refreshed_at || "").slice(0,16))} WIB</span>
-     <a class="btn" target="_blank" rel="noopener" href="https://github.com/${GITHUB_REPO}/actions/workflows/refresh.yml">Refresh data ↗</a>
-     <a class="btn" href="admin.html">Edit columns</a>`;
+     <button class="btn pri" id="shotSave" data-noshot title="Save the dashboard, as currently filtered, as a PNG">📷 Save PNG</button>
+     <button class="btn" id="shotCopy" data-noshot title="Copy the image to paste into WhatsApp / email">Copy image</button>
+     <button class="btn" id="fsBtn" data-noshot title="Full screen (Esc to exit)">⛶ Full screen</button>
+     <a class="btn" data-noshot target="_blank" rel="noopener" href="https://github.com/${GITHUB_REPO}/actions/workflows/refresh.yml">Refresh data ↗</a>
+     <a class="btn" data-noshot href="admin.html">Edit columns</a>`;
+  document.getElementById("shotSave").onclick = () => takeShot("save");
+  document.getElementById("shotCopy").onclick = () => takeShot("copy");
+  const fsBtn = document.getElementById("fsBtn");
+  fsBtn.onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => toast("Full screen is blocked by this browser - press F11"));
+  document.addEventListener("fullscreenchange", () => fsBtn.textContent = document.fullscreenElement ? "✕ Exit full screen" : "⛶ Full screen");
   const tabsEl = document.getElementById("tabs");
   tabsEl.innerHTML = CONFIG.tabs.map(t => `<button data-id="${esc(t.id)}">${esc(t.name)}</button>`).join("");
   tabsEl.onclick = e => { const b = e.target.closest("button"); if (b) location.hash = b.dataset.id; };
@@ -107,27 +150,49 @@ function selectTab() {
   TAB = CONFIG.tabs.find(t => t.id === id) || CONFIG.tabs[0];
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.id === TAB.id));
   BRANDS = TAB.brand_filter ? tabBrands(DATA, CONFIG, TAB) : [];
-  state.brand = ""; state.sortCol = -1; state.collapsed.clear(); state.exp.clear();
-  recompute(); render();
+  state.brand = ""; state.sortCol = -1;
+  recompute(); setLevel(state.lvl); render();
 }
-function recompute() {
-  const r = computeTab(DATA, CONFIG, TAB, { sub: true, brand: state.brand });
-  VALS = r.vals; SUB = r.sub;
-}
+function recompute() { VALS = computeTab(DATA, CONFIG, TAB, { brand: state.brand }); }
 
-function sumInto(acc, v) { for (let i = 0; i < acc.length; i++) acc[i] += v[i]; }
+// Proportional widths: label block 34% of the width (Region 5: 28% name + 6% Stores), every number column equal.
+// min-width keeps numbers readable on small screens (table scrolls sideways instead).
+const NAME_PCT = 34, STORES_PCT = 6;
+function colgroup(n, withStores) {
+  const each = (100 - NAME_PCT) / n;
+  const lead = withStores ? `<col style="width:${NAME_PCT - STORES_PCT}%"><col style="width:${STORES_PCT}%">` : `<col style="width:${NAME_PCT}%">`;
+  return `<colgroup>${lead}${`<col style="width:${each}%">`.repeat(n)}</colgroup>`;
+}
+const tableMin = n => `min-width:${360 + n * 86}px`;
+const sumInto = (acc, v) => { for (let i = 0; i < acc.length; i++) acc[i] += v[i]; };
 const nonzero = v => v && v.some(x => x);
-const drillName = () => DRILL_LABELS[TAB.drill || "model_type_detail"] || "detail";
+
+// ----- Region 5 store list after filters -----
+function r5Stores() {
+  return [...DATA.stores.values()].filter(s => s.region === "REGION 5" &&
+    (nonzero(VALS.get(s.site)) || (state.zero && zeroSalesStore(CONFIG, s))));
+}
+const L_ = s => s.lob || "(no LOB)", T_ = s => s.tsh || "(no TSH)";
+
+// "Show down to": 0 = LOB, 1 = TSH, 2 = Store (Summit style)
+function setLevel(l) {
+  state.lvl = l; state.open.clear();
+  if (l === 0 || !VALS) return;
+  for (const s of r5Stores()) { state.open.add(L_(s)); if (l >= 2) state.open.add(L_(s) + "|" + T_(s)); }
+}
 
 function render() {
   const n = TAB.columns.length;
   const brandTxt = state.brand ? ` · brand ${esc(state.brand)}` : "";
-  // ---------- Brand filter (tabs with brand_filter) ----------
-  const brandBar = TAB.brand_filter ? `
-    <div class="bar"><label>Brand<select id="fBrand"><option value="">All brands</option>${BRANDS.map(b => `<option${b === state.brand ? " selected" : ""}>${esc(b)}</option>`).join("")}</select></label>
-      <span class="note">Filters both tables. In the Region 5 table, click ⊞ on a column to split it by brand.</span></div>` : "";
+  const cells = (v, extra = "") => TAB.columns.map((c, i) => `<td class="${c.total ? "tot" : ""}${v[i] ? "" : " zero"}${extra}">${v[i] ? fmt(v[i]) : "–"}</td>`).join("");
 
-  // ---------- Region table ----------
+  // ---------- Brand filter ----------
+  const brandBar = TAB.brand_filter ? `
+    <div class="card" style="padding:12px 18px"><div class="bar" style="margin:0">
+      <label>Brand<select id="fBrand"><option value="">All brands</option>${BRANDS.map(b => `<option${b === state.brand ? " selected" : ""}>${esc(b)}</option>`).join("")}</select></label>
+      <span class="note" style="margin:0 0 8px">Filters both tables below.</span></div></div>` : "";
+
+  // ---------- Sales all region ----------
   const byRegion = new Map();
   for (const [site, v] of VALS) {
     if (!nonzero(v)) continue;
@@ -138,132 +203,97 @@ function render() {
   const regions = [...byRegion.keys()].sort((a, b) => regionRank(a) - regionRank(b) || a.localeCompare(b));
   const gt = new Float64Array(n); regions.forEach(r => sumInto(gt, byRegion.get(r)));
   const head = TAB.columns.map(c => `<th class="${c.total ? "tot" : ""}">${esc(c.label)}</th>`).join("");
-  const cells = v => TAB.columns.map((c, i) => `<td class="${c.total ? "tot" : ""}">${fmt(v[i])}</td>`).join("");
   const regionHTML = `
     <div class="card"><h2>Sales all region <small>${esc(TAB.name)}${brandTxt} · qty sold today</small></h2>
-    <div class="scroll"><table>
+    <div class="scroll"><table style="${tableMin(n)}">${colgroup(n, false)}
       <thead><tr><th class="l">Region</th>${head}</tr></thead>
       <tbody>${regions.map(r => `<tr class="${r === "REGION 5" ? "r5" : ""}"><td class="l">${esc(r)}</td>${cells(byRegion.get(r))}</tr>`).join("")
         || `<tr><td class="l" colspan="${n + 1}">No sales yet today.</td></tr>`}
         <tr class="grand"><td class="l">Total</td>${cells(gt)}</tr></tbody>
     </table></div></div>`;
 
-  // ---------- Region 5 table: stores ----------
-  let r5 = [...DATA.stores.values()].filter(s => s.region === "REGION 5");
-  r5 = r5.filter(s => nonzero(VALS.get(s.site)) || (state.zero && zeroSalesStore(CONFIG, s)));
-  const lobs = [...new Set(r5.map(s => s.lob || "(no LOB)"))].sort();
+  // ---------- Region 5: LOB -> TSH -> Store ----------
+  const all = r5Stores();
+  const lobs = [...new Set(all.map(L_))].sort();
   if (state.lob && !lobs.includes(state.lob)) state.lob = "";
-  const r5a = r5.filter(s => !state.lob || (s.lob || "(no LOB)") === state.lob);
-  const tshs = [...new Set(r5a.map(s => s.tsh || "(no TSH)"))].sort();
+  const a1 = all.filter(s => !state.lob || L_(s) === state.lob);
+  const tshs = [...new Set(a1.map(T_))].sort();
   if (state.tsh && !tshs.includes(state.tsh)) state.tsh = "";
-  const r5b = r5a.filter(s => !state.tsh || (s.tsh || "(no TSH)") === state.tsh);
-  const sites = [...r5b].sort((a, b) => a.desc.localeCompare(b.desc));
+  const a2 = a1.filter(s => !state.tsh || T_(s) === state.tsh);
+  const sites = [...a2].sort((a, b) => a.desc.localeCompare(b.desc));
   if (state.site && !sites.some(s => s.site === state.site)) state.site = "";
   const q = state.q.trim().toUpperCase();
-  const shown = r5b.filter(s => (!state.site || s.site === state.site) && (!q || s.desc.toUpperCase().includes(q) || s.site.toUpperCase().includes(q)));
+  const shown = a2.filter(s => (!state.site || s.site === state.site) && (!q || s.desc.toUpperCase().includes(q) || s.site.toUpperCase().includes(q)));
+  if (state.site || q) shown.forEach(s => { state.open.add(L_(s)); state.open.add(L_(s) + "|" + T_(s)); });
 
-  // ---------- Region 5 table: columns, with drill-down ----------
-  // spec = list of displayed columns: {i, key:null} = the column itself, {i, key} = one drill value inside column i
-  const spec = [];
-  const subKeys = TAB.columns.map((c, i) => {
-    const m = new Map();
-    for (const s of shown) { const sr = SUB.get(s.site); if (sr) for (const [k, v] of sr[i]) m.set(k, (m.get(k) || 0) + v); }
-    return [...m.entries()].filter(e => e[1]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(e => e[0]);
-  });
-  TAB.columns.forEach((c, i) => {
-    spec.push({ i, key: null });
-    if (state.exp.has(i)) subKeys[i].forEach(k => spec.push({ i, key: k }));
-  });
-  const zeroN = new Float64Array(spec.length);
-  const vecCache = new Map();
-  const vec = s => {
-    let v = vecCache.get(s.site); if (v) return v;
-    const base = VALS.get(s.site), sr = SUB.get(s.site);
-    v = new Float64Array(spec.length);
-    if (base) spec.forEach((c, j) => { v[j] = c.key === null ? base[c.i] : (sr[c.i].get(c.key) || 0); });
-    vecCache.set(s.site, v); return v;
-  };
-  const cls = c => c.key !== null ? "subc" : (TAB.columns[c.i].total ? "tot" : "");
-  const cells5 = v => spec.map((c, j) => `<td class="${cls(c)}">${fmt(v[j])}</td>`).join("");
-  if (state.sortCol >= spec.length) state.sortCol = -1;
+  const zeroV = new Float64Array(n), val = s => VALS.get(s.site) || zeroV;
   const sc = state.sortCol;
-
-  const opt = (vals, cur, all) => `<option value="">${all}</option>` + vals.map(v => `<option${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("");
-  const siteOpt = `<option value="">All</option>` + sites.map(s => `<option value="${esc(s.site)}"${s.site === state.site ? " selected" : ""}>${esc(s.desc)}</option>`).join("");
-
-  // group LOB -> TSH -> sites
-  const sortSites = arr => arr.sort(sc >= 0 ? (a, b) => vec(b)[sc] - vec(a)[sc] || a.desc.localeCompare(b.desc) : (a, b) => a.desc.localeCompare(b.desc));
+  const order = (arr, nameOf, vecOf) => arr.sort(sc >= 0 ? (a, b) => vecOf(b)[sc] - vecOf(a)[sc] || nameOf(a).localeCompare(nameOf(b)) : (a, b) => nameOf(a).localeCompare(nameOf(b)));
   const tree = new Map();
   for (const s of shown) {
-    const L = s.lob || "(no LOB)", T = s.tsh || "(no TSH)";
-    if (!tree.has(L)) tree.set(L, new Map());
-    if (!tree.get(L).has(T)) tree.get(L).set(T, []);
-    tree.get(L).get(T).push(s);
+    if (!tree.has(L_(s))) tree.set(L_(s), new Map());
+    const t = tree.get(L_(s)); if (!t.has(T_(s))) t.set(T_(s), []); t.get(T_(s)).push(s);
   }
-  let rows = "", grand = new Float64Array(spec.length);
-  for (const L of [...tree.keys()].sort()) {
-    const lobTot = new Float64Array(spec.length), lk = "L|" + L, lc = state.collapsed.has(lk);
-    let lobRows = "";
-    for (const T of [...tree.get(L).keys()].sort()) {
-      const list = sortSites(tree.get(L).get(T)), tk = "T|" + L + "|" + T, tc = state.collapsed.has(tk);
-      const tTot = new Float64Array(spec.length);
-      list.forEach(s => sumInto(tTot, vec(s)));
-      sumInto(lobTot, tTot);
-      if (lc) continue;
-      if (!tc) lobRows += list.map(s => `<tr><td class="l dim">${esc(L)}</td><td class="l dim">${esc(T)}</td><td class="l" title="${esc(s.site)}">${esc(s.desc)}</td>${cells5(vec(s))}</tr>`).join("");
-      lobRows += `<tr class="sub"><td class="l dim">${esc(L)}</td><td class="l"><button class="tg" data-k="${esc(tk)}">${tc ? "⊞" : "⊟"}</button>${esc(T)}</td><td class="l">Total${tc ? ` <span class="dim">(${list.length} stores)</span>` : ""}</td>${cells5(tTot)}</tr>`;
+  const tot = list => { const v = new Float64Array(n); list.forEach(s => sumInto(v, val(s))); return v; };
+  let rows = ""; const grand = tot(shown);
+  const lobE = order([...tree].map(([L, tm]) => { const ss = [...tm.values()].flat(); return { L, tm, ss, v: tot(ss) }; }), o => o.L, o => o.v);
+  for (const o of lobE) {
+    const open = state.open.has(o.L);
+    rows += `<tr class="g0" data-key="${esc(o.L)}"><td class="l name" style="padding-left:12px"><span class="caret">${open ? "▼" : "▶"}</span><span class="lvl">LOB</span>${esc(o.L)}</td><td class="cnt">${o.ss.length}</td>${cells(o.v)}</tr>`;
+    if (!open) continue;
+    const tshE = order([...o.tm].map(([T, ss]) => ({ T, ss, v: tot(ss) })), x => x.T, x => x.v);
+    for (const t of tshE) {
+      const k = o.L + "|" + t.T, topen = state.open.has(k);
+      rows += `<tr class="g1" data-key="${esc(k)}"><td class="l name" style="padding-left:30px"><span class="caret">${topen ? "▼" : "▶"}</span><span class="lvl">TSH</span>${esc(t.T)}</td><td class="cnt">${t.ss.length}</td>${cells(t.v)}</tr>`;
+      if (!topen) continue;
+      for (const s of order([...t.ss], s => s.desc, val))
+        rows += `<tr class="st"><td class="l name" style="padding-left:62px" title="${esc(s.site)} · ${esc(s.desc)}"><span class="site">${esc(s.site)}</span>${esc(s.desc)}</td><td></td>${cells(val(s))}</tr>`;
     }
-    sumInto(grand, lobTot);
-    rows += lobRows + `<tr class="lobsub"><td class="l"><button class="tg" data-k="${esc(lk)}">${lc ? "⊞" : "⊟"}</button>${esc(L)}</td><td class="l">Total</td><td></td>${cells5(lobTot)}</tr>`;
   }
-  const head5 = spec.map((c, j) => {
-    const arr = `<span class="arr">${sc === j ? "▼" : ""}</span>`;
-    if (c.key !== null) return `<th class="subc" data-sort="${j}" title="${esc(TAB.columns[c.i].label)} › ${esc(c.key)}">${esc(c.key)} ${arr}</th>`;
-    const col = TAB.columns[c.i], open = state.exp.has(c.i), can = subKeys[c.i].length > 0;
-    const btn = can ? `<button class="dr" data-dr="${c.i}" title="${open ? "Collapse" : "Drill down by " + esc(drillName())}">${open ? "−" : "+"}</button>` : "";
-    return `<th class="${col.total ? "tot" : ""}${open ? " par" : ""}" data-sort="${j}" title="Sort stores by ${esc(col.label)}">${esc(col.label)}${btn} ${arr}</th>`;
-  }).join("");
-  const anyOpen = state.exp.size > 0;
-  const zeroTxt = describeZero();
+
+  const opt = (vals, cur) => `<option value="">All</option>` + vals.map(v => `<option${v === cur ? " selected" : ""}>${esc(v)}</option>`).join("");
+  const siteOpt = `<option value="">All (${sites.length})</option>` + sites.map(s => `<option value="${esc(s.site)}"${s.site === state.site ? " selected" : ""}>${esc(s.site)} · ${esc(s.desc)}</option>`).join("");
+  const head5 = TAB.columns.map((c, i) => `<th class="${c.total ? "tot" : ""}" data-sort="${i}" title="Sort by ${esc(c.label)} (high to low)">${esc(c.label)} <span class="arr">${sc === i ? "▼" : ""}</span></th>`).join("");
+  const lvlBtn = (l, t) => `<button type="button" data-lvl="${l}" aria-pressed="${state.lvl === l}">${t}</button>`;
   const r5HTML = `
-    <div class="card"><h2>Region 5 <small>${esc(TAB.name)}${brandTxt} · by LOB, TSH and store · ${shown.length} stores</small></h2>
+    <div class="card"><h2>Region 5 · LOB → TSH → Store <small>${esc(TAB.name)}${brandTxt} · ${shown.length} stores</small></h2>
       <div class="filters">
-        <label>LOB<select id="fLob">${opt(lobs, state.lob, "All")}</select></label>
-        <label>TSH<select id="fTsh">${opt(tshs, state.tsh, "All")}</select></label>
-        <label>Site desc<select id="fSite">${siteOpt}</select></label>
+        <label>LOB<select id="fLob">${opt(lobs, state.lob)}</select></label>
+        <label>TSH<select id="fTsh">${opt(tshs, state.tsh)}</select></label>
+        <label>Site desc<select id="fSite" style="min-width:260px">${siteOpt}</select></label>
         <label>Search store<input type="search" id="fQ" placeholder="name or site code" value="${esc(state.q)}"></label>
-        <label class="chk" title="${esc(zeroTxt)}"><input type="checkbox" id="fZero"${state.zero ? " checked" : ""}>&nbsp;Show ${esc(zeroTxt)} with no sales</label>
-        <button class="btn" id="fExp">${anyOpen ? "Collapse all columns" : "Drill down all columns"}</button>
-        <button class="btn" id="fReset">Reset</button>
-        <button class="btn" id="fCsv">Download CSV</button>
+        <label class="chk"><input type="checkbox" id="fZero"${state.zero ? " checked" : ""}>Show active stores with no sales</label>
+        <span class="grow"></span>
+        <span class="lvlbtns" data-noshot>Show down to <span class="seg">${lvlBtn(0, "LOB")}${lvlBtn(1, "TSH")}${lvlBtn(2, "Store")}</span></span>
+        <button class="btn" id="fReset" data-noshot>Reset</button>
+        <button class="btn" id="fCsv" data-noshot>Download CSV</button>
       </div>
-      <div class="scroll"><table id="t5">
-        <thead><tr><th class="l" data-sort="-1">LOB</th><th class="l" data-sort="-1">TSH</th><th class="l" data-sort="-1">SITE DESC</th>${head5}</tr></thead>
-        <tbody>${rows || `<tr><td class="l" colspan="${spec.length + 3}">No Region 5 sales for this selection.</td></tr>`}
-          <tr class="grand"><td class="l">Total</td><td></td><td></td>${cells5(grand)}</tr></tbody>
+      <div class="scroll" id="r5scroll"><table id="t5" style="${tableMin(n)}">${colgroup(n, true)}
+        <thead><tr><th class="l" data-sort="-1" title="Sort by name">LOB / TSH / Store</th><th data-sort="-1">Stores</th>${head5}</tr></thead>
+        <tbody>${rows || `<tr><td class="l" colspan="${n + 2}">No Region 5 sales for this selection.</td></tr>`}</tbody>
+        <tfoot><tr><td class="l">Total Region 5</td><td>${shown.length}</td>${cells(grand)}</tr></tfoot>
       </table></div>
-      <div class="note">Qty = PAID, ${esc(describeDefault())}. Click <b>+</b> on a column header to drill it down by ${esc(drillName().toLowerCase())} (shaded columns), <b>−</b> to close.
-        Click a header to sort stores by it, click ⊟ to collapse a LOB or TSH.</div>
+      <div class="note" data-noshot>Qty = PAID, ${esc(describeDefault())}. Click a LOB or TSH row to open or close it, or use <b>Show down to</b>. Click a column header to sort high to low (click again for A–Z).</div>
     </div>`;
 
+  const keep = document.getElementById("r5scroll"), st = keep ? keep.scrollTop : 0;
   document.getElementById("main").innerHTML = brandBar + regionHTML + r5HTML;
+  if (keep) document.getElementById("r5scroll").scrollTop = st;
   const $ = id => document.getElementById(id);
-  if ($("fBrand")) $("fBrand").onchange = e => { state.brand = e.target.value; state.sortCol = -1; recompute(); render(); };
+  if ($("fBrand")) $("fBrand").onchange = e => { state.brand = e.target.value; recompute(); setLevel(state.lvl); render(); };
   $("fLob").onchange = e => { state.lob = e.target.value; state.tsh = ""; state.site = ""; render(); };
-  $("fTsh").onchange = e => { state.tsh = e.target.value; state.site = ""; render(); };
+  $("fTsh").onchange = e => { state.tsh = e.target.value; state.site = ""; if (state.tsh) setLevel(Math.max(state.lvl, 2)); render(); };
   $("fSite").onchange = e => { state.site = e.target.value; render(); };
   $("fQ").oninput = e => { state.q = e.target.value; clearTimeout(window._qt); window._qt = setTimeout(() => { render(); const el = $("fQ"); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }, 250); };
-  $("fZero").onchange = e => { state.zero = e.target.checked; render(); };
-  $("fExp").onclick = () => { if (anyOpen) state.exp.clear(); else TAB.columns.forEach((c, i) => state.exp.add(i)); state.sortCol = -1; render(); };
-  $("fReset").onclick = () => { Object.assign(state, { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1 }); state.collapsed.clear(); state.exp.clear(); render(); };
-  $("fCsv").onclick = () => downloadCsv(shown, vec, spec);
+  $("fZero").onchange = e => { state.zero = e.target.checked; setLevel(state.lvl); render(); };
+  $("fReset").onclick = () => { Object.assign(state, { lob: "", tsh: "", site: "", q: "", zero: false, sortCol: -1 }); setLevel(1); render(); };
+  $("fCsv").onclick = () => downloadCsv(shown, val);
+  document.querySelectorAll("[data-lvl]").forEach(b => b.onclick = () => { setLevel(+b.dataset.lvl); render(); });
   $("t5").onclick = e => {
-    const d = e.target.closest(".dr");
-    if (d) { const i = +d.dataset.dr; state.exp.has(i) ? state.exp.delete(i) : state.exp.add(i); state.sortCol = -1; render(); return; }
-    const b = e.target.closest(".tg");
-    if (b) { const k = b.dataset.k; state.collapsed.has(k) ? state.collapsed.delete(k) : state.collapsed.add(k); render(); return; }
+    const tr = e.target.closest("tr[data-key]");
+    if (tr) { const k = tr.dataset.key; state.open.has(k) ? state.open.delete(k) : state.open.add(k); render(); return; }
     const th = e.target.closest("th[data-sort]");
-    if (th) { const i = +th.dataset.sort; state.sortCol = state.sortCol === i ? -1 : i; render(); }
+    if (th) { const i = +th.dataset.sort; state.sortCol = (i < 0 || state.sortCol === i) ? -1 : i; render(); }
   };
 }
 
@@ -271,22 +301,94 @@ function describeDefault() {
   const d = CONFIG.default_filter || {};
   return Object.entries(d).map(([k, v]) => `${FIELD_LABELS[k] || k} = ${v.join(" / ")}`).join(", ") || "no default filter";
 }
-function describeZero() {
-  const r = CONFIG.zero_sales_store_filter || { status: ["Active"] };
-  const st = (r.status || []).join("/"), bu = (r.bu_category || []).join("/");
-  return [st && st.toLowerCase(), bu, "stores"].filter(Boolean).join(" ");
-}
 
-function downloadCsv(list, vec, spec) {
+function downloadCsv(list, val) {
   const q = s => `"${String(s).replace(/"/g, '""')}"`;
-  const names = spec.map(c => c.key === null ? TAB.columns[c.i].label : TAB.columns[c.i].label + " > " + c.key);
-  const lines = [["LOB", "TSH", "Site Code", "Site Desc", ...names].map(q).join(",")];
+  const lines = [["LOB", "TSH", "Site Code", "Site Desc", ...TAB.columns.map(c => c.label)].map(q).join(",")];
   [...list].sort((a, b) => (a.lob + a.tsh + a.desc).localeCompare(b.lob + b.tsh + b.desc))
-    .forEach(s => lines.push([s.lob, s.tsh, s.site, s.desc].map(q).concat([...vec(s)].map(x => Math.round(x))).join(",")));
+    .forEach(s => lines.push([s.lob, s.tsh, s.site, s.desc].map(q).concat([...val(s)].map(x => Math.round(x))).join(",")));
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\n")], { type: "text/csv" }));
   a.download = `focus_${TAB.id}${state.brand ? "_" + state.brand : ""}_R5_${(DATA.raw.data_date || "").replace(/\//g, "")}.csv`;
   a.click();
+}
+
+// ===== Screenshot (same method as Summit Samsung): render the page, as filtered, to PNG without libraries =====
+function toast(msg, ms = 2500) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(toast._t); toast._t = setTimeout(() => (t.style.display = "none"), ms);
+}
+function shotName() {
+  const now = new Date(), p = n => String(n).padStart(2, "0");
+  const scope = [state.brand, state.lob, state.tsh, state.site].filter(Boolean).join("_") || "All";
+  return `Focus_${TAB.name}_${scope}_${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}.png`.replace(/[^\w.\-]+/g, "_");
+}
+function cloneWithStyles(src) {
+  const dst = src.cloneNode(false);
+  if (src.nodeType === 1) {
+    const cs = getComputedStyle(src);
+    for (let i = 0; i < cs.length; i++) dst.style.setProperty(cs[i], cs.getPropertyValue(cs[i]));
+    if (src.tagName === "SELECT") {
+      const span = document.createElement("span");
+      for (let i = 0; i < cs.length; i++) span.style.setProperty(cs[i], cs.getPropertyValue(cs[i]));
+      span.style.display = "inline-block"; span.style.overflow = "hidden"; span.style.whiteSpace = "nowrap";
+      span.textContent = src.selectedOptions[0] ? src.selectedOptions[0].textContent : "";
+      return span;
+    }
+    if (src.tagName === "INPUT") { dst.setAttribute("value", src.value); if (src.checked) dst.setAttribute("checked", ""); }
+  }
+  for (const c of src.childNodes) {
+    if (c.nodeType === 1 && c.hasAttribute("data-noshot")) continue;
+    if (c.nodeType === 8) continue;
+    dst.appendChild(cloneWithStyles(c));
+  }
+  return dst;
+}
+async function renderShot() {
+  const area = document.getElementById("shotArea");
+  const clone = cloneWithStyles(area);
+  clone.querySelectorAll(".scroll").forEach(e => { e.style.maxHeight = "none"; e.style.overflow = "visible"; });
+  clone.querySelectorAll("th, tfoot td, header").forEach(e => { e.style.position = "static"; });
+  clone.querySelectorAll("*").forEach(e => { e.style.backdropFilter = "none"; e.style.webkitBackdropFilter = "none"; });
+  clone.style.margin = "0"; clone.style.minHeight = "0";
+  const W = Math.ceil(Math.max(area.getBoundingClientRect().width, document.getElementById("main").scrollWidth));
+  clone.style.width = W + "px";
+  const holder = document.createElement("div");
+  holder.style.cssText = "position:absolute;left:-100000px;top:0;";
+  holder.appendChild(clone); document.body.appendChild(holder);
+  const H = Math.ceil(clone.getBoundingClientRect().height);
+  document.body.removeChild(holder);
+  const bg = "linear-gradient(160deg,#f2f8fc 0%,#e1eef7 38%,#cfe3f1 72%,#bcd7ea 100%)";
+  const xml = new XMLSerializer().serializeToString(clone);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><foreignObject x="0" y="0" width="100%" height="100%">` +
+              `<div xmlns="http://www.w3.org/1999/xhtml" style="background:${bg};width:${W}px;height:${H}px">${xml}</div></foreignObject></svg>`;
+  const img = new Image();
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  await img.decode();
+  const scale = 2, canvas = document.createElement("canvas");
+  canvas.width = W * scale; canvas.height = H * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#e1eef7"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
+  return new Promise((res, rej) => canvas.toBlob(b => (b ? res(b) : rej(new Error("toBlob failed"))), "image/png"));
+}
+async function takeShot(mode) {
+  const btns = [document.getElementById("shotSave"), document.getElementById("shotCopy")];
+  btns.forEach(b => (b.disabled = true)); toast("Capturing…", 10000);
+  try {
+    if (mode === "copy" && navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": renderShot() })]);
+      toast("Image copied - paste it into WhatsApp / email (Ctrl+V)");
+    } else {
+      const blob = await renderShot();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = shotName();
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      toast(mode === "copy" ? "Copy isn't supported in this browser - saved as PNG instead" : "Saved " + a.download);
+    }
+  } catch (e) { console.error(e); toast("Screenshot failed: " + e.message, 5000); }
+  finally { btns.forEach(b => (b.disabled = false)); }
 }
 </script>
 </body>
