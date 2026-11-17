@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" id="vp" content="width=device-width, initial-scale=1">
+<script>
+  // Phones open the full laptop layout zoomed out to fit the screen (pinch to zoom in).
+  // "Phone layout" button switches to the stacked mobile layout; the choice is remembered on that phone.
+  (function () {
+    var small = Math.min(screen.width, screen.height) < 760, mode = null;
+    try { mode = localStorage.getItem("dfp_view"); } catch (e) {}
+    window.IS_PHONE = small;
+    window.VIEW_MODE = small ? (mode || "full") : "desk";
+    if (window.VIEW_MODE === "full") document.getElementById("vp").setAttribute("content", "width=1440");
+  })();
+</script>
 <title>Report Daily Focus Product</title>
 <style>
   /* ===== iPhone 18 Pro "Glacier" theme: ice blue, frosted glass, deep steel-blue ink ===== */
@@ -48,6 +59,7 @@
   table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed}
   th{white-space:normal;line-height:1.25;vertical-align:bottom}
   td.name,td.l{overflow:hidden;text-overflow:ellipsis}
+  td.i0{padding-left:12px}td.i1{padding-left:30px}td.i2{padding-left:62px}
   th,td{padding:8px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
   th{position:static;background:linear-gradient(180deg,#eaf4fa,#dcecf6);color:var(--steel);font-weight:650;text-align:right;
     border-bottom:1px solid var(--ice-3);cursor:pointer;user-select:none;font-size:14px}
@@ -86,7 +98,54 @@
   .msg{padding:40px;text-align:center;color:var(--muted)}
   .note{font-size:13px;color:var(--muted);margin-top:10px}
   .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:rgba(21,43,60,.92);color:#fff;padding:9px 16px;border-radius:12px;display:none;z-index:50;font-size:12px}
-  @media (max-width:760px){body{font-size:14px}header{padding:10px 12px}main{padding:12px}h1{font-size:17px}.stamp b{font-size:18px}}
+  /* ===== Phones & small tablets ===== */
+  @media (max-width:760px){
+    body{font-size:13.5px;background-attachment:scroll}
+    header{position:static;padding:12px 12px 10px;gap:10px;display:grid;grid-template-columns:1fr;backdrop-filter:none;-webkit-backdrop-filter:none}
+    h1{order:1;font-size:17px;min-width:0;line-height:1.2}
+    .stamp{order:2}
+    .stamp div{flex:1;padding:6px 12px;border-radius:12px}
+    .stamp b{font-size:17px}.stamp span{font-size:11px}
+    .tabs{order:3;flex-wrap:nowrap;overflow-x:auto;border-radius:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -2px}
+    .tabs::-webkit-scrollbar,.tools::-webkit-scrollbar{display:none}
+    .tabs button{flex:0 0 auto;padding:9px 14px;font-size:13px}
+    .tools{order:4;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+    .tools .btn{flex:0 0 auto;padding:8px 12px;font-size:13px}
+    .tools .chip{flex:0 0 auto}
+    .hideM{display:none!important}
+    main{padding:10px}
+    .card{padding:12px 10px;border-radius:16px;margin-bottom:12px;backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,.82)}
+    .card h2{font-size:15.5px;margin-bottom:10px;gap:4px 8px}
+    .card h2 small{font-size:12px;flex-basis:100%}
+    .filters,.bar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .filters label,.bar label{font-size:11px;min-width:0}
+    .filters label.wide,.filters .chk,.lvlbtns,.bar label{grid-column:1 / -1}
+    .filters .grow{display:none}
+    select,input[type=search]{min-width:0!important;width:100%;font-size:16px;padding:9px 10px}  /* 16px stops iPhone zooming in */
+    .chk{font-size:13.5px}
+    .lvlbtns{display:flex;justify-content:space-between}
+    .seg button{padding:7px 16px;font-size:13.5px}
+    .filters .btn{font-size:13px;padding:9px 10px;text-align:center}
+    /* tables: fixed narrow number columns, swipe sideways, name column stays pinned on the left */
+    table{min-width:0!important;width:auto}
+    col.cRegion{width:118px!important} col.cName{width:172px!important} col.cStores{width:50px!important} col.cNum{width:72px!important}
+    #t5{width:calc(222px + var(--n) * 72px)} .scroll table:not(#t5){width:calc(118px + var(--n) * 72px)}
+    th,td{padding:7px 7px;font-size:13px}
+    th{font-size:11.5px;line-height:1.2;white-space:normal;padding:7px 4px}
+    th:first-child,td:first-child{position:sticky;left:0;z-index:3;background:#f4f9fc;box-shadow:1px 0 0 var(--ice-3)}
+    th:first-child{z-index:4;background:#e3f0f8}
+    tr.r5 td:first-child{background:var(--hi);box-shadow:inset 3px 0 0 var(--glacier),1px 0 0 var(--ice-3)}
+    tr.g0 td:first-child{background:var(--lvl0)} tr.g1 td:first-child{background:var(--lvl1)}
+    tr.grand td:first-child,tfoot td:first-child{background:#dcecf6}
+    td.name{white-space:normal;line-height:1.25;word-break:break-word}
+    td.i0{padding-left:6px}td.i1{padding-left:14px}td.i2{padding-left:24px}
+    .lvl{display:none}
+    .site{display:block;font-size:11px;margin:0 0 1px}
+    .caret{width:13px}
+    .note{font-size:12px}
+    .swipe{display:block}
+  }
+  .swipe{display:none;font-size:11.5px;color:var(--muted);margin:-4px 0 6px}
 </style>
 </head>
 <body>
@@ -128,12 +187,19 @@ const state = { brand: "", lob: "", tsh: "", site: "", q: "", zero: false, sortC
     `<span class="chip" title="When BigQuery was last queried">Imported ${esc((DATA.raw.refreshed_at || "").slice(0,16))} WIB</span>
      <button class="btn pri" id="shotSave" data-noshot title="Save the dashboard, as currently filtered, as a PNG">📷 Save PNG</button>
      <button class="btn" id="shotCopy" data-noshot title="Copy the image to paste into WhatsApp / email">Copy image</button>
-     <button class="btn" id="fsBtn" data-noshot title="Full screen (Esc to exit)">⛶ Full screen</button>
+     ${IS_PHONE ? `<button class="btn" id="viewBtn" data-noshot>${VIEW_MODE === "full" ? "📱 Phone layout" : "🖥 Full view"}</button>` : ""}
+     <button class="btn hideM" id="fsBtn" data-noshot title="Full screen (Esc to exit)">⛶ Full screen</button>
      <a class="btn" data-noshot target="_blank" rel="noopener" href="https://github.com/${GITHUB_REPO}/actions/workflows/refresh.yml">Refresh data ↗</a>
-     <a class="btn" data-noshot href="admin.html">Edit columns</a>`;
+     <a class="btn hideM" data-noshot href="admin.html">Edit columns</a>`;
   document.getElementById("shotSave").onclick = () => takeShot("save");
   document.getElementById("shotCopy").onclick = () => takeShot("copy");
+  const viewBtn = document.getElementById("viewBtn");
+  if (viewBtn) viewBtn.onclick = () => {
+    try { localStorage.setItem("dfp_view", VIEW_MODE === "full" ? "phone" : "full"); } catch (e) {}
+    location.reload();
+  };
   const fsBtn = document.getElementById("fsBtn");
+  if (!document.fullscreenEnabled) fsBtn.style.display = "none";   // iPhone Safari has no full-screen API
   fsBtn.onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => toast("Full screen is blocked by this browser - press F11"));
   document.addEventListener("fullscreenchange", () => fsBtn.textContent = document.fullscreenElement ? "✕ Exit full screen" : "⛶ Full screen");
   const tabsEl = document.getElementById("tabs");
@@ -158,10 +224,10 @@ function recompute() { VALS = computeTab(DATA, CONFIG, TAB, { brand: state.brand
 const NAME_PCT = 34, STORES_PCT = 6;
 function colgroup(n, withStores) {
   const each = (100 - NAME_PCT) / n;
-  const lead = withStores ? `<col style="width:${NAME_PCT - STORES_PCT}%"><col style="width:${STORES_PCT}%">` : `<col style="width:${NAME_PCT}%">`;
-  return `<colgroup>${lead}${`<col style="width:${each}%">`.repeat(n)}</colgroup>`;
+  const lead = withStores ? `<col class="cName" style="width:${NAME_PCT - STORES_PCT}%"><col class="cStores" style="width:${STORES_PCT}%">` : `<col class="cRegion" style="width:${NAME_PCT}%">`;
+  return `<colgroup>${lead}${`<col class="cNum" style="width:${each}%">`.repeat(n)}</colgroup>`;
 }
-const tableMin = n => `min-width:${420 + n * 100}px`;
+const tableMin = n => `--n:${n};min-width:${360 + n * 96}px`;
 const sumInto = (acc, v) => { for (let i = 0; i < acc.length; i++) acc[i] += v[i]; };
 const nonzero = v => v && v.some(x => x);
 
@@ -203,6 +269,7 @@ function render() {
   const head = TAB.columns.map(c => `<th class="${c.total ? "tot" : ""}">${esc(c.label)}</th>`).join("");
   const regionHTML = `
     <div class="card"><h2>Sales all region <small>${esc(TAB.name)}${brandTxt} · qty sold today</small></h2>
+    <div class="swipe" data-noshot>← swipe the table sideways to see all columns →</div>
     <div class="scroll"><table style="${tableMin(n)}">${colgroup(n, false)}
       <thead><tr><th class="l">Region</th>${head}</tr></thead>
       <tbody>${regions.map(r => `<tr class="${r === "REGION 5" ? "r5" : ""}"><td class="l">${esc(r)}</td>${cells(byRegion.get(r))}</tr>`).join("")
@@ -237,15 +304,15 @@ function render() {
   const lobE = order([...tree].map(([L, tm]) => { const ss = [...tm.values()].flat(); return { L, tm, ss, v: tot(ss) }; }), o => o.L, o => o.v);
   for (const o of lobE) {
     const open = state.open.has(o.L);
-    rows += `<tr class="g0" data-key="${esc(o.L)}"><td class="l name" style="padding-left:12px"><span class="caret">${open ? "▼" : "▶"}</span><span class="lvl">LOB</span>${esc(o.L)}</td><td class="cnt">${o.ss.length}</td>${cells(o.v)}</tr>`;
+    rows += `<tr class="g0" data-key="${esc(o.L)}"><td class="l name i0"><span class="caret">${open ? "▼" : "▶"}</span><span class="lvl">LOB</span>${esc(o.L)}</td><td class="cnt">${o.ss.length}</td>${cells(o.v)}</tr>`;
     if (!open) continue;
     const tshE = order([...o.tm].map(([T, ss]) => ({ T, ss, v: tot(ss) })), x => x.T, x => x.v);
     for (const t of tshE) {
       const k = o.L + "|" + t.T, topen = state.open.has(k);
-      rows += `<tr class="g1" data-key="${esc(k)}"><td class="l name" style="padding-left:30px"><span class="caret">${topen ? "▼" : "▶"}</span><span class="lvl">TSH</span>${esc(t.T)}</td><td class="cnt">${t.ss.length}</td>${cells(t.v)}</tr>`;
+      rows += `<tr class="g1" data-key="${esc(k)}"><td class="l name i1"><span class="caret">${topen ? "▼" : "▶"}</span><span class="lvl">TSH</span>${esc(t.T)}</td><td class="cnt">${t.ss.length}</td>${cells(t.v)}</tr>`;
       if (!topen) continue;
       for (const s of order([...t.ss], s => s.desc, val))
-        rows += `<tr class="st"><td class="l name" style="padding-left:62px" title="${esc(s.site)} · ${esc(s.desc)}"><span class="site">${esc(s.site)}</span>${esc(s.desc)}</td><td></td>${cells(val(s))}</tr>`;
+        rows += `<tr class="st"><td class="l name i2" title="${esc(s.site)} · ${esc(s.desc)}"><span class="site">${esc(s.site)}</span>${esc(s.desc)}</td><td></td>${cells(val(s))}</tr>`;
     }
   }
 
@@ -258,14 +325,15 @@ function render() {
       <div class="filters">
         <label>LOB<select id="fLob">${opt(lobs, state.lob)}</select></label>
         <label>TSH<select id="fTsh">${opt(tshs, state.tsh)}</select></label>
-        <label>Site desc<select id="fSite" style="min-width:260px">${siteOpt}</select></label>
-        <label>Search store<input type="search" id="fQ" placeholder="name or site code" value="${esc(state.q)}"></label>
+        <label class="wide">Site desc<select id="fSite" style="min-width:260px">${siteOpt}</select></label>
+        <label class="wide">Search store<input type="search" id="fQ" placeholder="name or site code" value="${esc(state.q)}"></label>
         <label class="chk"><input type="checkbox" id="fZero"${state.zero ? " checked" : ""}>Show active stores with no sales</label>
         <span class="grow"></span>
         <span class="lvlbtns" data-noshot>Show down to <span class="seg">${lvlBtn(0, "LOB")}${lvlBtn(1, "TSH")}${lvlBtn(2, "Store")}</span></span>
         <button class="btn" id="fReset" data-noshot>Reset</button>
         <button class="btn" id="fCsv" data-noshot>Download CSV</button>
       </div>
+      <div class="swipe" data-noshot>Tap a LOB / TSH row to open it · swipe sideways for more columns</div>
       <div class="scroll" id="r5scroll"><table id="t5" style="${tableMin(n)}">${colgroup(n, true)}
         <thead><tr><th class="l" data-sort="-1" title="Sort by name">LOB / TSH / Store</th><th data-sort="-1">Stores</th>${head5}</tr></thead>
         <tbody>${rows || `<tr><td class="l" colspan="${n + 2}">No Region 5 sales for this selection.</td></tr>`}</tbody>
@@ -346,10 +414,29 @@ async function renderShot() {
   const area = document.getElementById("shotArea");
   const clone = cloneWithStyles(area);
   clone.querySelectorAll(".scroll").forEach(e => { e.style.maxHeight = "none"; e.style.overflow = "visible"; });
-  clone.querySelectorAll("th, tfoot td, header").forEach(e => { e.style.position = "static"; });
+  clone.querySelectorAll("th, td, header").forEach(e => { e.style.position = "static"; });
   clone.querySelectorAll("*").forEach(e => { e.style.backdropFilter = "none"; e.style.webkitBackdropFilter = "none"; });
   clone.style.margin = "0"; clone.style.minHeight = "0";
-  const W = Math.ceil(Math.max(area.getBoundingClientRect().width, document.getElementById("main").scrollWidth));
+  // widest table decides the image width, so swiped-away columns on a phone are included too
+  const tablesW = Math.max(0, ...[...area.querySelectorAll(".scroll table")].map(t => t.offsetWidth));
+  const pad = innerWidth <= 760 ? 44 : 90;
+  const W = Math.ceil(Math.max(area.getBoundingClientRect().width, tablesW + pad));
+  // let containers size to their content (computed px heights/widths were copied from the live page)
+  [clone, ...clone.querySelectorAll("header, main, .card, .scroll, .filters, .bar, .tabs, .tools, .stamp")].forEach(e => {
+    e.style.width = "auto"; e.style.maxWidth = "none"; e.style.height = "auto"; e.style.minHeight = "0"; e.style.overflow = "visible";
+  });
+  clone.querySelectorAll(".tabs, .tools").forEach(e => { e.style.flexWrap = "wrap"; });
+  clone.querySelectorAll("h1").forEach(e => { e.style.width = "auto"; e.style.height = "auto"; e.style.whiteSpace = "nowrap"; e.style.flex = "0 0 auto"; });
+  if (innerWidth <= 760) {   // phone: lay the image out like the desktop page
+    const hdr = clone.querySelector("header");
+    hdr.style.display = "flex"; hdr.style.flexWrap = "wrap"; hdr.style.alignItems = "center";
+    clone.querySelectorAll(".stamp div").forEach(e => { e.style.width = "auto"; e.style.flex = "0 0 auto"; });
+    clone.querySelectorAll(".filters").forEach(e => { e.style.display = "flex"; e.style.flexWrap = "wrap"; e.style.alignItems = "flex-end"; });
+    clone.querySelectorAll(".filters label").forEach(e => { e.style.width = "auto"; e.style.height = "auto"; e.style.gridColumn = "auto"; });
+    clone.querySelectorAll(".filters select, .filters input[type=search]").forEach(e => { e.style.width = "190px"; e.style.height = "auto"; });
+    clone.querySelectorAll(".card h2 small").forEach(e => { e.style.flexBasis = "auto"; });
+    clone.querySelectorAll(".scroll table").forEach(e => { e.style.width = "100%"; });
+  }
   clone.style.width = W + "px";
   const holder = document.createElement("div");
   holder.style.cssText = "position:absolute;left:-100000px;top:0;";
@@ -379,6 +466,11 @@ async function takeShot(mode) {
       toast("Image copied - paste it into WhatsApp / email (Ctrl+V)");
     } else {
       const blob = await renderShot();
+      const file = new File([blob], shotName(), { type: "image/png" });
+      if (IS_PHONE && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: file.name }); toast("Shared"); return; }
+        catch (e) { if (e.name === "AbortError") { toast("Cancelled"); return; } }
+      }
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = shotName();
       document.body.appendChild(a); a.click(); a.remove();
