@@ -25,7 +25,6 @@
           "APPLE"
         ]
       },
-      "drill": "model_type_detail",
       "columns": [
         {
           "label": "All Device",
@@ -118,7 +117,6 @@
           "SAMSUNG"
         ]
       },
-      "drill": "model_type_detail",
       "columns": [
         {
           "label": "All Device",
@@ -211,7 +209,6 @@
           "XIAOMI"
         ]
       },
-      "drill": "model_type_detail",
       "columns": [
         {
           "label": "All Device",
@@ -289,7 +286,6 @@
           "OPPO"
         ]
       },
-      "drill": "model_type_detail",
       "columns": [
         {
           "label": "All Device",
@@ -374,7 +370,6 @@
           "VIVO"
         ]
       },
-      "drill": "model_type_detail",
       "columns": [
         {
           "label": "All Device",
@@ -452,7 +447,6 @@
           "Repair Contract"
         ]
       },
-      "drill": "brand",
       "brand_filter": true,
       "columns": [
         {
@@ -461,6 +455,11 @@
           "match": {
             "product_category": [
               "Operator"
+            ],
+            "brand": [
+              "TELKOMSEL",
+              "INDOSAT",
+              "XL AXIATA"
             ]
           }
         },
@@ -506,7 +505,6 @@
           "Accessories"
         ]
       },
-      "drill": "brand",
       "brand_filter": true,
       "columns": [
         {
