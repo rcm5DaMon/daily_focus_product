@@ -26,7 +26,7 @@ mr AS (
 ),
 ms AS (
   SELECT site_code, ANY_VALUE(Store_Name) AS store_name, ANY_VALUE(LOB) AS lob, ANY_VALUE(TSH) AS tsh,
-         ANY_VALUE(STATUS) AS status
+         ANY_VALUE(STATUS) AS status, ANY_VALUE(BU_CATEGORY) AS bu
   FROM `e-smart-433113.sales_b2c.master_store_r5`
   GROUP BY site_code
 ),
@@ -52,7 +52,8 @@ stores AS (
     COALESCE(ms.store_name, p.pos_desc, mr.site_desc, s.site) AS site_desc,
     COALESCE(ms.lob, p.pos_lob, '') AS lob,
     COALESCE(ms.tsh, p.pos_tsh, '') AS tsh,
-    COALESCE(ms.status, '') AS status
+    COALESCE(ms.status, '') AS status,
+    COALESCE(ms.bu, '') AS bu
   FROM site_list s
   LEFT JOIN mr ON mr.site_code = s.site
   LEFT JOIN ms ON ms.site_code = s.site
@@ -86,8 +87,8 @@ SELECT TO_JSON_STRING(STRUCT(
   (SELECT d FROM last_day) AS data_date,                                        -- yyyy/mm/dd
   (SELECT MAX(`Time`) FROM sd_day) AS last_time,                                -- latest PAID transaction, all regions
   (SELECT MAX(`Time`) FROM sd_day WHERE region = 'REGION 5') AS last_time_r5,
-  -- site|region|site_desc|lob|tsh|status
-  ARRAY(SELECT CONCAT(site, '|', region, '|', REPLACE(site_desc, '|', '/'), '|', lob, '|', tsh, '|', status)
+  -- site|region|site_desc|lob|tsh|status|bu_category
+  ARRAY(SELECT CONCAT(site, '|', region, '|', REPLACE(site_desc, '|', '/'), '|', lob, '|', tsh, '|', status, '|', bu)
         FROM stores ORDER BY site) AS stores,
   -- item|brand|product_category|detail_cat|model_type|model_type_detail|rofo_category|item_description
   ARRAY(SELECT CONCAT(item, '|', brand, '|', pc, '|', dc, '|', mt, '|', mtd, '|', rofo, '|', REPLACE(descr, '|', '/'))
