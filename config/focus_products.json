@@ -8,14 +8,6 @@
       "Include"
     ]
   },
-  "zero_sales_store_filter": {
-    "status": [
-      "Active"
-    ],
-    "bu_category": [
-      "1MULTIBRAND"
-    ]
-  },
   "tabs": [
     {
       "id": "apple",
@@ -275,6 +267,17 @@
               "MI PAD 8"
             ]
           }
+        },
+        {
+          "label": "PO XIAOMI 18",
+          "match": {
+            "model_type": [
+              "XIAOMI 18"
+            ],
+            "ket_po": [
+              "PO"
+            ]
+          }
         }
       ]
     },
@@ -357,6 +360,17 @@
           "match": {
             "model_type": [
               "X9"
+            ]
+          }
+        },
+        {
+          "label": "PO X10",
+          "match": {
+            "model_type": [
+              "X10"
+            ],
+            "ket_po": [
+              "PO"
             ]
           }
         }
@@ -447,7 +461,6 @@
           "Repair Contract"
         ]
       },
-      "brand_filter": true,
       "columns": [
         {
           "label": "All Operator",
@@ -455,11 +468,6 @@
           "match": {
             "product_category": [
               "Operator"
-            ],
-            "brand": [
-              "TELKOMSEL",
-              "INDOSAT",
-              "XL AXIATA"
             ]
           }
         },
@@ -505,7 +513,6 @@
           "Accessories"
         ]
       },
-      "brand_filter": true,
       "columns": [
         {
           "label": "All Accessories",
