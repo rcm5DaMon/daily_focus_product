@@ -212,6 +212,17 @@
           }
         },
         {
+          "label": "PO XIAOMI 18",
+          "match": {
+            "model_type": [
+              "XIAOMI 18"
+            ],
+            "ket_po": [
+              "PO"
+            ]
+          }
+        },
+        {
           "label": "Xiaomi 17",
           "match": {
             "model_type_detail": [
@@ -267,17 +278,6 @@
               "MI PAD 8"
             ]
           }
-        },
-        {
-          "label": "PO XIAOMI 18",
-          "match": {
-            "model_type": [
-              "XIAOMI 18"
-            ],
-            "ket_po": [
-              "PO"
-            ]
-          }
         }
       ]
     },
@@ -304,6 +304,17 @@
           "match": {
             "model_type": [
               "RENO 15"
+            ]
+          }
+        },
+        {
+          "label": "PO X10",
+          "match": {
+            "model_type": [
+              "X10"
+            ],
+            "ket_po": [
+              "PO"
             ]
           }
         },
@@ -360,17 +371,6 @@
           "match": {
             "model_type": [
               "X9"
-            ]
-          }
-        },
-        {
-          "label": "PO X10",
-          "match": {
-            "model_type": [
-              "X10"
-            ],
-            "ket_po": [
-              "PO"
             ]
           }
         }
