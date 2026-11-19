@@ -300,14 +300,6 @@
           }
         },
         {
-          "label": "Reno 15",
-          "match": {
-            "model_type": [
-              "RENO 15"
-            ]
-          }
-        },
-        {
           "label": "PO X10",
           "match": {
             "model_type": [
@@ -315,6 +307,14 @@
             ],
             "ket_po": [
               "PO"
+            ]
+          }
+        },
+        {
+          "label": "Reno 15",
+          "match": {
+            "model_type": [
+              "RENO 15"
             ]
           }
         },
