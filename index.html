@@ -163,7 +163,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="assets/engine.js"></script>
+<script src="assets/engine.js?v=20261121"></script>
 <script>
 "use strict";
 let DATA, CONFIG, TAB, VALS, BRANDS = [], isDraft = false;
@@ -189,25 +189,8 @@ const state = { brand: "", lob: "", tsh: "", site: "", q: "", zero: false, sortC
      <button class="btn" id="shotCopy" data-noshot title="Copy the image to paste into WhatsApp / email">Copy image</button>
      ${IS_PHONE ? `<button class="btn" id="viewBtn" data-noshot>${VIEW_MODE === "full" ? "📱 Phone layout" : "🖥 Full view"}</button>` : ""}
      <button class="btn hideM" id="fsBtn" data-noshot title="Full screen (Esc to exit)">⛶ Full screen</button>
-     <a class="btn locked" data-noshot target="_blank" rel="noopener" href="https://github.com/${GITHUB_REPO}/actions/workflows/refresh.yml"><span class="lk">🔒 </span>Refresh data ↗</a>
-     <a class="btn hideM locked" data-noshot href="admin.html"><span class="lk">🔒 </span>Edit columns</a>
-     <button class="btn" id="lockBtn" data-noshot title="Lock the buttons again">🔓 Lock</button>`;
-  // Refresh data / Edit columns need the login; it lasts until this tab is closed
-  const showLock = () => {
-    const open = isUnlocked();
-    document.querySelectorAll("a.locked .lk").forEach(e => e.style.display = open ? "none" : "");
-    document.getElementById("lockBtn").style.display = open ? "" : "none";
-  };
-  document.querySelectorAll("a.locked").forEach(a => a.addEventListener("click", async e => {
-    if (isUnlocked()) return;
-    e.preventDefault();
-    if (await requireLogin(a.textContent.includes("Refresh") ? "Enter the login to refresh the data." : "Enter the login to edit tabs and columns.")) {
-      showLock();
-      if (a.target === "_blank") window.open(a.href, "_blank", "noopener"); else location.href = a.href;
-    }
-  }));
-  document.getElementById("lockBtn").onclick = () => { relock(); showLock(); toast("Locked"); };
-  showLock();
+     <a class="btn" data-noshot target="_blank" rel="noopener" href="https://github.com/${GITHUB_REPO}/actions/workflows/refresh.yml">Refresh data ↗</a>
+     <a class="btn hideM" data-noshot href="admin.html">Edit columns</a>`;
   document.getElementById("shotSave").onclick = () => takeShot("save");
   document.getElementById("shotCopy").onclick = () => takeShot("copy");
   const viewBtn = document.getElementById("viewBtn");

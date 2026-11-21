@@ -19,32 +19,6 @@
   .btn.x{color:#b42318}
   .wrap{display:grid;grid-template-columns:260px minmax(0,1fr) 340px;gap:16px;padding:16px 20px 40px}
   @media (max-width:1200px){.wrap{grid-template-columns:1fr}}
-  @media (max-width:760px){
-    header{position:static;padding:10px 12px}
-    header h1{min-width:0;font-size:15px}
-    header .btn{padding:6px 9px;font-size:12px}
-    .wrap{padding:10px;gap:10px;grid-template-columns:minmax(0,1fr)}
-    header{flex-wrap:wrap}
-    .cond .btn{justify-self:end;width:auto}
-    .card h2{font-size:12px}
-    #tabCard>div{flex-wrap:wrap}
-    label.f{min-width:0!important;width:100%!important}
-    .card{padding:10px}
-    .cond,aside .cond{display:flex!important;flex-wrap:wrap}
-    .cond select{flex:1 1 100%;width:100%;min-width:0}
-    .cond input{flex:1 1 0}
-    select,input{max-width:100%}
-    td.rules{min-width:0!important}
-    #tabCard table, #cols, #cols tr, #cols td{display:block;width:auto}
-    .cond input{min-width:0}
-    #cols td input[type=text]{width:100%}
-    #cols tr{border:1px solid var(--line);border-radius:12px;padding:6px;margin-bottom:10px;background:rgba(255,255,255,.6)}
-    #cols td{border:0;padding:4px 2px}
-    #cols td.num{display:inline-block;width:auto;margin-right:12px}
-    #cols td.num::before{content:attr(data-h) " ";color:var(--muted);font-weight:500;font-size:11px}
-    #tabCard table thead{display:none}
-    select,input[type=text]{font-size:16px}
-  }
   .card{background:var(--card);backdrop-filter:blur(12px);border:1px solid #fff;border-radius:18px;box-shadow:0 10px 30px rgba(36,80,111,.12);padding:12px 14px;margin-bottom:14px}
   .card h2{font-size:13px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
   .tablist button{display:flex;justify-content:space-between;width:100%;text-align:left;border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:6px;margin-bottom:6px;cursor:pointer;font:600 12px system-ui}
@@ -135,7 +109,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="assets/engine.js"></script>
+<script src="assets/engine.js?v=20261121"></script>
 <script>
 "use strict";
 let DATA, PUBLISHED, CFG, cur = 0, selCol = -1;
@@ -144,7 +118,6 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const toast = m => { const t = $("toast"); t.textContent = m; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 1600); };
 
 (async function () {
-  if (!(await requireLogin("The back end is locked. Enter the login to edit tabs and columns.", false))) return;
   const [raw, cfg] = await Promise.all([fetchJSON("data/daily.json"), loadConfig()]);
   DATA = parseData(raw);
   PUBLISHED = cfg;
@@ -280,7 +253,7 @@ function renderTab() {
     tr.innerHTML = `<td><button class="btn sm" data-a="up">↑</button><button class="btn sm" data-a="down">↓</button></td>
       <td><input type="text" value="${esc(c.label)}" style="width:100%"></td><td class="rules"></td>
       <td><input type="checkbox"${c.total ? " checked" : ""}></td>
-      <td class="num" data-h="All regions">${fmt(tot.all[i]) || "0"}</td><td class="num" data-h="R5">${fmt(tot.r5[i]) || "0"}</td>
+      <td class="num">${fmt(tot.all[i]) || "0"}</td><td class="num">${fmt(tot.r5[i]) || "0"}</td>
       <td><button class="btn sm x" data-a="del">✕</button></td>`;
     const rules = tr.querySelector(".rules");
     rules.append(condEditor(c.match, o => { c.match = o; refreshNums(); save(); }));
