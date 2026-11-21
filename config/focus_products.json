@@ -8,6 +8,14 @@
       "Include"
     ]
   },
+  "zero_sales_store_filter": {
+    "status": [
+      "Active"
+    ],
+    "bu_category": [
+      "1MULTIBRAND"
+    ]
+  },
   "tabs": [
     {
       "id": "apple",
@@ -461,6 +469,7 @@
           "Repair Contract"
         ]
       },
+      "brand_filter": true,
       "columns": [
         {
           "label": "All Operator",
@@ -513,6 +522,7 @@
           "Accessories"
         ]
       },
+      "brand_filter": true,
       "columns": [
         {
           "label": "All Accessories",
