@@ -308,13 +308,13 @@
           }
         },
         {
-          "label": "PO X10",
+          "label": "X10",
           "match": {
             "model_type": [
               "X10"
             ],
             "ket_po": [
-              "PO"
+              "Non PO"
             ]
           }
         },
