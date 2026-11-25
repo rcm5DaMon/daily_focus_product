@@ -14,6 +14,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: write      # lets the deploy job clear an old site package when a run is re-run
 
 concurrency:
   group: refresh-and-deploy
@@ -69,12 +70,19 @@ jobs:
           cp index.html admin.html _site/
           cp -r assets config data _site/
       - uses: actions/configure-pages@v6
-      # Name includes the attempt number, so "Re-run" never finds two artifacts with the same name
+      # A re-run keeps the site package from the earlier attempt, and deploy-pages refuses when it finds two.
+      # Delete any earlier "github-pages" package of this run first, then upload a fresh one.
+      - name: Remove old site package (re-runs)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for id in $(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+                       --jq '.artifacts[] | select(.name | startswith("github-pages")) | .id'); do
+            echo "Deleting old artifact $id"
+            gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id"
+          done
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
-          name: github-pages-${{ github.run_attempt }}
       - id: deployment
         uses: actions/deploy-pages@v5
-        with:
-          artifact_name: github-pages-${{ github.run_attempt }}
